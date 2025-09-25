@@ -511,7 +511,6 @@ function showHint() {
 // Factors Toggle
 function initializeFactorsToggle() {
   const factorsButton = document.getElementById("factors-button");
-  const factorsHeader = document.getElementById("factors");
   const factorSections = document.querySelectorAll(".factor-section");
 
   // Don't hide challenges section by default
@@ -522,7 +521,11 @@ function initializeFactorsToggle() {
   });
 
   function toggleFactors(e) {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      // Prevent bubbling so clicking the button doesn't also trigger the section click handler
+      e.stopPropagation();
+    }
     const anyHidden = Array.from(factorSections).some(
       (s) => s.style.display === "none"
     );
@@ -538,10 +541,19 @@ function initializeFactorsToggle() {
   }
 
   if (factorsButton) factorsButton.addEventListener("click", toggleFactors);
-  if (factorsHeader) factorsHeader.addEventListener("click", toggleFactors);
 
   // Hero CTA Explore Factors
   const heroExploreBtn = document.getElementById("cta-explore-factors");
+  // Helper to explicitly set visibility for all factor sections
+  function setSectionsVisibility(show) {
+    factorSections.forEach((s) => {
+      if (s.id === 'challenges') {
+        s.style.display = 'block';
+      } else {
+        s.style.display = show ? 'block' : 'none';
+      }
+    });
+  }
   if (heroExploreBtn) {
     heroExploreBtn.addEventListener("click", () => {
       // Ensure all factor sections are visible and scroll into view
@@ -555,7 +567,7 @@ function initializeFactorsToggle() {
   if (challengesSection) {
     challengesSection.style.display = "block";
   }
-  
+
   factorSections.forEach((s) => (s.style.display = "block"));
   scrollToSection("factors");
 }
@@ -668,19 +680,19 @@ function completeTask(taskName, points) {
     points = taskName;
     taskName = "Daily Challenge";
   }
-  
+
   // Ensure points is a valid number
   points = parseInt(points) || 0;
-  
+
   const currentPoints = parseInt(localStorage.getItem("ecoPoints") || "0");
   const newPoints = currentPoints + points;
-  
+
   localStorage.setItem("ecoPoints", newPoints.toString());
   updatePointsDisplay();
-  
+
   // Show success message
   showMessage(`${taskName} completed! +${points} eco-points earned!`, "success");
-  
+
   console.log(`Task completed: ${taskName}, Points: ${points}, Total: ${newPoints}`);
 }
 
@@ -691,13 +703,13 @@ function completeDailyChallenge(button, challengeName, points) {
     showMessage('Challenge already completed today!', 'warning');
     return;
   }
-  
+
   // Complete the task
   completeTask(challengeName, points);
-  
+
   // Animate button completion
   animateTaskCompletion(button);
-  
+
   // Update button state after animation
   setTimeout(() => {
     button.classList.add('completed');
@@ -706,7 +718,7 @@ function completeDailyChallenge(button, challengeName, points) {
     button.style.cursor = 'not-allowed';
     button.disabled = true;
   }, 600);
-  
+
   // Store completion in localStorage
   const today = new Date().toDateString();
   const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '{}');
@@ -719,19 +731,19 @@ function completeDailyChallenge(button, challengeName, points) {
 
 function updatePointsDisplay() {
   const points = localStorage.getItem("ecoPoints") || "0";
-  
+
   // Update main points display
   const pointsElement = document.getElementById("points");
   if (pointsElement) {
     pointsElement.textContent = points;
   }
-  
+
   // Update profile points display
   const profilePointsElement = document.getElementById("profile-points");
   if (profilePointsElement) {
     profilePointsElement.textContent = points;
   }
-  
+
   // Update any other points displays
   const allPointsElements = document.querySelectorAll('[id*="points"]');
   allPointsElements.forEach(element => {
@@ -739,7 +751,7 @@ function updatePointsDisplay() {
       element.textContent = points;
     }
   });
-  
+
   console.log(`Points updated: ${points}`);
 }
 
@@ -755,7 +767,7 @@ function scrollToSection(sectionId) {
 function initializeGSAPAnimations() {
   // Hero section - staggered entrance
   const heroTl = gsap.timeline();
-  
+
   heroTl
     .from(".hero-content h1", {
       duration: 1.5,
@@ -838,7 +850,7 @@ function addHoverAnimations() {
         ease: "power2.out"
       });
     });
-    
+
     card.addEventListener('mouseleave', () => {
       gsap.to(card, {
         duration: 0.3,
@@ -859,7 +871,7 @@ function addHoverAnimations() {
         ease: "power2.out"
       });
     });
-    
+
     btn.addEventListener('mouseleave', () => {
       gsap.to(btn, {
         duration: 0.2,
@@ -874,33 +886,33 @@ function addHoverAnimations() {
 // Enhanced task completion animation
 function animateTaskCompletion(element) {
   const tl = gsap.timeline();
-  
+
   // Button press effect
   tl.to(element, {
     duration: 0.1,
     scale: 0.95,
     ease: "power2.in"
   })
-  // Success bounce
-  .to(element, {
-    duration: 0.4,
-    scale: 1.1,
-    backgroundColor: "#4CAF50",
-    ease: "back.out(1.7)"
-  })
-  // Settle back
-  .to(element, {
-    duration: 0.3,
-    scale: 1,
-    ease: "power2.out"
-  })
-  // Icon rotation
-  .from(element.querySelector('i'), {
-    duration: 0.5,
-    rotation: 360,
-    scale: 0,
-    ease: "elastic.out(1, 0.3)"
-  }, "-=0.4");
+    // Success bounce
+    .to(element, {
+      duration: 0.4,
+      scale: 1.1,
+      backgroundColor: "#4CAF50",
+      ease: "back.out(1.7)"
+    })
+    // Settle back
+    .to(element, {
+      duration: 0.3,
+      scale: 1,
+      ease: "power2.out"
+    })
+    // Icon rotation
+    .from(element.querySelector('i'), {
+      duration: 0.5,
+      rotation: 360,
+      scale: 0,
+      ease: "elastic.out(1, 0.3)"
+    }, "-=0.4");
 
   // Points popup animation
   showPointsPopup(element, 10);
@@ -922,13 +934,13 @@ function showPointsPopup(element, points) {
     pointer-events: none;
     z-index: 1000;
   `;
-  
+
   element.style.position = 'relative';
   element.appendChild(popup);
-  
-  gsap.fromTo(popup, 
+
+  gsap.fromTo(popup,
     { y: 0, opacity: 1, scale: 0.5 },
-    { 
+    {
       duration: 1.5,
       y: -50,
       opacity: 0,
@@ -965,7 +977,7 @@ function animateMapReveal() {
   const mapContainer = document.getElementById('challenges-map');
   if (mapContainer) {
     gsap.fromTo(mapContainer,
-      { 
+      {
         scale: 0.5,
         opacity: 0,
         rotationY: 90
@@ -3243,30 +3255,30 @@ function showQuestionReview() {
       </div>
       <div class="review-options">
         ${question.options.map((option, optIndex) => {
-          let optionClass = "";
-          let icon = "";
-          
-          if (optIndex === correctAnswer) {
-            optionClass = "correct-answer";
-            icon = '<i class="fas fa-check"></i>';
-          } else if (optIndex === userAnswer && userAnswer !== correctAnswer) {
-            optionClass = "wrong-answer";
-            icon = '<i class="fas fa-times"></i>';
-          }
-          
-          return `
+      let optionClass = "";
+      let icon = "";
+
+      if (optIndex === correctAnswer) {
+        optionClass = "correct-answer";
+        icon = '<i class="fas fa-check"></i>';
+      } else if (optIndex === userAnswer && userAnswer !== correctAnswer) {
+        optionClass = "wrong-answer";
+        icon = '<i class="fas fa-times"></i>';
+      }
+
+      return `
             <div class="review-option ${optionClass}">
               ${icon} ${String.fromCharCode(65 + optIndex)}) ${option}
             </div>
           `;
-        }).join("")}
+    }).join("")}
       </div>
       <div class="review-result">
-        ${isCorrect 
-          ? '<span class="result-correct"><i class="fas fa-check-circle"></i> Correct!</span>' 
-          : `<span class="result-incorrect"><i class="fas fa-times-circle"></i> Incorrect</span>
+        ${isCorrect
+        ? '<span class="result-correct"><i class="fas fa-check-circle"></i> Correct!</span>'
+        : `<span class="result-incorrect"><i class="fas fa-times-circle"></i> Incorrect</span>
              <span class="correct-info">Correct answer: ${String.fromCharCode(65 + correctAnswer)}) ${question.options[correctAnswer]}</span>`
-        }
+      }
       </div>
     `;
 
@@ -3288,13 +3300,13 @@ function goBackToCategories() {
   // Hide quiz container and show categories
   document.querySelector(".quiz-container").style.display = "none";
   document.querySelector(".quiz-categories").style.display = "grid";
-  
+
   // Reset quiz state
   currentQuiz = null;
   currentQuestionIndex = 0;
   userAnswers = [];
   quizScore = 0;
-  
+
   // Show message
   showMessage("Quiz cancelled. Choose another category!", "info");
 }
@@ -3305,12 +3317,12 @@ function initializeAIFeatures() {
   const modeBtns = document.querySelectorAll('.mode-btn');
   const cameraContainer = document.querySelector('.camera-container');
   const uploadContainer = document.querySelector('.upload-container');
-  
+
   modeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       modeBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
+
       const mode = btn.dataset.mode;
       if (mode === 'camera') {
         cameraContainer.style.display = 'block';
@@ -3321,25 +3333,25 @@ function initializeAIFeatures() {
       }
     });
   });
-  
+
   // Image upload functionality
   const imageUpload = document.getElementById('image-upload');
   const uploadZone = document.getElementById('upload-zone');
   const uploadPreview = document.getElementById('upload-preview');
   const uploadedImage = document.getElementById('uploaded-image');
-  
+
   // Drag and drop functionality
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadZone.style.borderColor = '#4CAF50';
     uploadZone.style.background = 'rgba(76, 175, 80, 0.2)';
   });
-  
+
   uploadZone.addEventListener('dragleave', () => {
     uploadZone.style.borderColor = 'rgba(255, 255, 255, 0.3)';
     uploadZone.style.background = 'transparent';
   });
-  
+
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
@@ -3347,20 +3359,20 @@ function initializeAIFeatures() {
       handleImageUpload(files[0]);
     }
   });
-  
+
   imageUpload.addEventListener('change', (e) => {
     if (e.target.files.length > 0) {
       handleImageUpload(e.target.files[0]);
     }
   });
-  
+
   // Clear upload functionality
   document.getElementById('clear-upload').addEventListener('click', () => {
     uploadPreview.style.display = 'none';
     uploadZone.style.display = 'block';
     imageUpload.value = '';
   });
-  
+
   // Analyze uploaded image
   document.getElementById('analyze-uploaded').addEventListener('click', () => {
     analyzeWasteImage(uploadedImage.src);
@@ -3372,13 +3384,13 @@ function handleImageUpload(file) {
     showMessage('Please upload a valid image file', 'error');
     return;
   }
-  
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const uploadedImage = document.getElementById('uploaded-image');
     const uploadPreview = document.getElementById('upload-preview');
     const uploadZone = document.getElementById('upload-zone');
-    
+
     uploadedImage.src = e.target.result;
     uploadPreview.style.display = 'block';
     uploadZone.style.display = 'none';
@@ -3388,7 +3400,7 @@ function handleImageUpload(file) {
 
 function analyzeWasteImage(imageSrc) {
   showMessage('Analyzing image with AI...', 'info');
-  
+
   // Simulate AI analysis (in real implementation, this would call an AI service)
   setTimeout(() => {
     const wasteItems = [
@@ -3398,7 +3410,7 @@ function analyzeWasteImage(imageSrc) {
       { name: 'Glass Jar', category: 'glass', confidence: 90 },
       { name: 'Aluminum Can', category: 'metal', confidence: 94 }
     ];
-    
+
     const randomItem = wasteItems[Math.floor(Math.random() * wasteItems.length)];
     displayWasteAnalysis(randomItem);
   }, 2000);
@@ -3408,25 +3420,25 @@ function displayWasteAnalysis(item) {
   // Update identified item
   document.getElementById('identified-item-name').textContent = item.name;
   document.getElementById('confidence-score').textContent = `Confidence: ${item.confidence}%`;
-  
+
   // Update bin recommendation
   const binType = document.getElementById('bin-type');
   const binIcon = document.querySelector('.bin-icon');
   const recommendedBin = document.getElementById('recommended-bin');
-  
+
   binType.textContent = `${item.category.charAt(0).toUpperCase() + item.category.slice(1)} Bin`;
   binIcon.className = `bin-icon ${item.category}`;
-  
+
   // Update segregation instructions
   const instructions = getSegregationInstructions(item.category);
   document.getElementById('segregation-instructions').innerHTML = instructions;
-  
+
   // Update suggestions
   const suggestions = getWasteSuggestions(item.category);
   document.getElementById('recycling-tips').textContent = suggestions.recycling;
   document.getElementById('eco-alternatives').textContent = suggestions.alternatives;
   document.getElementById('environmental-impact').textContent = suggestions.impact;
-  
+
   // Show AI suggestions
   document.querySelector('.ai-suggestions').style.display = 'block';
   showMessage('AI analysis complete!', 'success');
@@ -3475,7 +3487,7 @@ function getSegregationInstructions(category) {
       </ul>
     `
   };
-  
+
   return instructions[category] || '<p>General waste disposal guidelines apply.</p>';
 }
 
@@ -3507,7 +3519,7 @@ function getWasteSuggestions(category) {
       impact: 'Recycling aluminum cans uses 95% less energy than producing new ones from raw materials.'
     }
   };
-  
+
   return suggestions[category] || {
     recycling: 'Follow local recycling guidelines for proper disposal.',
     alternatives: 'Look for eco-friendly alternatives to reduce waste generation.',
@@ -3521,7 +3533,7 @@ function initializeLocationFeatures() {
   const tabBtns = document.querySelectorAll('.tab-btn');
   const dailyChallenges = document.getElementById('daily-challenges');
   const locationChallenges = document.getElementById('location-challenges');
-  
+
   // Set default state - show daily challenges with responsive grid
   function setResponsiveGrid() {
     if (dailyChallenges) {
@@ -3529,7 +3541,7 @@ function initializeLocationFeatures() {
       dailyChallenges.style.display = 'grid';
       dailyChallenges.style.visibility = 'visible';
       dailyChallenges.style.opacity = '1';
-      
+
       if (window.innerWidth <= 480) {
         dailyChallenges.style.gridTemplateColumns = '1fr';
       } else if (window.innerWidth <= 1024) {
@@ -3537,9 +3549,9 @@ function initializeLocationFeatures() {
       } else {
         dailyChallenges.style.gridTemplateColumns = 'repeat(4, 1fr)';
       }
-      
+
       dailyChallenges.style.gap = '1.5rem';
-      
+
       // Ensure all cards are visible
       const cards = dailyChallenges.querySelectorAll('.challenge-card');
       cards.forEach(card => {
@@ -3547,16 +3559,16 @@ function initializeLocationFeatures() {
         card.style.visibility = 'visible';
         card.style.opacity = '1';
       });
-      
+
       console.log(`Grid set with ${cards.length} cards visible`);
     }
   }
-  
+
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       tabBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
+
       const tab = btn.dataset.tab;
       if (tab === 'daily') {
         setResponsiveGrid();
@@ -3567,14 +3579,14 @@ function initializeLocationFeatures() {
       }
     });
   });
-  
+
   // Get location functionality
   document.getElementById('get-location').addEventListener('click', getLocationChallenges);
-  
+
   // Initialize on load
   setResponsiveGrid();
   window.addEventListener('resize', setResponsiveGrid);
-  
+
   if (locationChallenges) {
     locationChallenges.style.display = 'none';
   }
@@ -3582,12 +3594,12 @@ function initializeLocationFeatures() {
 
 function getLocationChallenges() {
   showMessage('Getting your location...', 'info');
-  
+
   if (!navigator.geolocation) {
     showMessage('Geolocation is not supported by this browser', 'error');
     return;
   }
-  
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
       const lat = position.coords.latitude;
@@ -3609,18 +3621,18 @@ let challengeMarkers = [];
 function loadNearbyEnvironmentalActivities(lat, lng) {
   // Store user location
   userLocation = { lat, lng };
-  
+
   // Show map and hide placeholder
   document.getElementById('map-placeholder').style.display = 'none';
   document.getElementById('google-map').style.display = 'block';
-  
+
   // Initialize Map with animation
   initializeLeafletMap(lat, lng);
   animateMapReveal();
-  
+
   // Simulate loading nearby environmental activities
   showMessage('Finding environmental activities near you...', 'info');
-  
+
   setTimeout(() => {
     const sampleChallenges = [
       {
@@ -3664,16 +3676,16 @@ function loadNearbyEnvironmentalActivities(lat, lng) {
         lng: lng - 0.012
       }
     ];
-    
+
     // Add markers to map
     addChallengeMarkers(sampleChallenges);
-    
+
     // Update distance information
     const challengesWithDistance = sampleChallenges.map(challenge => ({
       ...challenge,
       location: `${challenge.location} (${challenge.distance} away)`
     }));
-    
+
     displayLocationChallenges(challengesWithDistance);
     showMessage('Found nearby environmental activities!', 'success');
   }, 2000);
@@ -3682,12 +3694,12 @@ function loadNearbyEnvironmentalActivities(lat, lng) {
 function initializeLeafletMap(lat, lng) {
   // Initialize Leaflet Map
   map = L.map('google-map').setView([lat, lng], 13);
-  
+
   // Add OpenStreetMap tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
-  
+
   // Create custom user location icon
   const userIcon = L.divIcon({
     className: 'user-location-marker',
@@ -3702,7 +3714,7 @@ function initializeLeafletMap(lat, lng) {
     iconSize: [20, 20],
     iconAnchor: [10, 10]
   });
-  
+
   // Add user location marker
   L.marker([lat, lng], { icon: userIcon })
     .addTo(map)
@@ -3713,11 +3725,11 @@ function initializeLeafletMap(lat, lng) {
 
 function addChallengeMarkers(challenges) {
   if (!map) return;
-  
+
   // Clear existing markers
   challengeMarkers.forEach(marker => map.removeLayer(marker));
   challengeMarkers = [];
-  
+
   // Add new markers
   challenges.forEach((challenge, index) => {
     // Create custom icon for challenge type
@@ -3738,7 +3750,7 @@ function addChallengeMarkers(challenges) {
       iconSize: [30, 30],
       iconAnchor: [15, 15]
     });
-    
+
     // Create marker
     const marker = L.marker([challenge.lat, challenge.lng], { icon: challengeIcon })
       .addTo(map)
@@ -3756,7 +3768,7 @@ function addChallengeMarkers(challenges) {
           </button>
         </div>
       `);
-    
+
     challengeMarkers.push(marker);
   });
 }
@@ -3800,14 +3812,14 @@ function loadSampleLocationChallenges() {
       distance: 'Unknown'
     }
   ];
-  
+
   displayLocationChallenges(sampleChallenges);
 }
 
 function displayLocationChallenges(challenges) {
   const challengesList = document.getElementById('location-challenges-list');
   challengesList.innerHTML = '';
-  
+
   challenges.forEach(challenge => {
     const challengeCard = document.createElement('div');
     challengeCard.className = 'location-challenge-card';
@@ -3843,19 +3855,19 @@ function initializeOnboarding() {
   const teacherOnboarding = document.getElementById('teacher-onboarding');
   const govtOnboarding = document.getElementById('govt-onboarding');
   const backButton = document.getElementById('back-to-roles');
-  
+
   // Role selection handlers
   roleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const role = btn.dataset.role;
       userTypeSelector.style.display = 'none';
       backButton.style.display = 'block';
-      
+
       // Hide all onboarding forms
       studentOnboarding.style.display = 'none';
       teacherOnboarding.style.display = 'none';
       govtOnboarding.style.display = 'none';
-      
+
       // Show selected role form
       if (role === 'student') {
         studentOnboarding.style.display = 'block';
@@ -3866,7 +3878,7 @@ function initializeOnboarding() {
       }
     });
   });
-  
+
   // Back button handler
   backButton.addEventListener('click', () => {
     userTypeSelector.style.display = 'block';
@@ -3875,7 +3887,7 @@ function initializeOnboarding() {
     govtOnboarding.style.display = 'none';
     backButton.style.display = 'none';
   });
-  
+
   // Verification handlers
   document.getElementById('verify-student').addEventListener('click', handleStudentVerification);
   document.getElementById('verify-teacher').addEventListener('click', handleTeacherVerification);
@@ -3888,15 +3900,15 @@ function handleStudentVerification() {
   const rollNumber = document.getElementById('roll-number').value;
   const studentName = document.getElementById('student-name').value;
   const studentPhone = document.getElementById('student-phone').value;
-  
+
   if (!udiseCode || !studentClass || !rollNumber || !studentName || !studentPhone) {
     showMessage('Please fill all required fields', 'error');
     return;
   }
-  
+
   // Simulate UDISE verification
   showMessage('Verifying UDISE code...', 'info');
-  
+
   setTimeout(() => {
     // Mock school data
     const mockSchools = {
@@ -3905,9 +3917,9 @@ function handleStudentVerification() {
       '03180301003': 'Government High School, Ludhiana',
       '03180401004': 'Khalsa College Public School, Patiala'
     };
-    
+
     const schoolName = mockSchools[udiseCode];
-    
+
     if (schoolName) {
       // Store student data
       const studentData = {
@@ -3923,20 +3935,20 @@ function handleStudentVerification() {
         ecoPoints: 0,
         level: 1
       };
-      
+
       localStorage.setItem('ecoUserData', JSON.stringify(studentData));
       localStorage.setItem('ecoUserName', studentName);
       localStorage.setItem('ecoUserRole', 'student');
       localStorage.setItem('ecoLoggedIn', 'true');
-      
+
       showMessage(`Welcome ${studentName}! Registered to ${schoolName}`, 'success');
-      
+
       setTimeout(() => {
         document.getElementById('login-overlay').style.display = 'none';
         setSectionsVisibility(true);
         updateProfileUI();
       }, 2000);
-      
+
     } else {
       showMessage('Invalid UDISE code. Please check and try again.', 'error');
     }
@@ -3949,14 +3961,14 @@ function handleTeacherVerification() {
   const teacherName = document.getElementById('teacher-name').value;
   const teacherRole = document.getElementById('teacher-role').value;
   const teacherPhone = document.getElementById('teacher-phone').value;
-  
+
   if (!teacherUdise || !teacherId || !teacherName || !teacherRole || !teacherPhone) {
     showMessage('Please fill all required fields', 'error');
     return;
   }
-  
+
   showMessage('Verifying teacher credentials...', 'info');
-  
+
   setTimeout(() => {
     const teacherData = {
       role: 'teacher',
@@ -3968,14 +3980,14 @@ function handleTeacherVerification() {
       registrationDate: new Date().toISOString(),
       permissions: ['moderate_submissions', 'create_challenges', 'view_analytics']
     };
-    
+
     localStorage.setItem('ecoUserData', JSON.stringify(teacherData));
     localStorage.setItem('ecoUserName', teacherName);
     localStorage.setItem('ecoUserRole', 'teacher');
     localStorage.setItem('ecoLoggedIn', 'true');
-    
+
     showMessage(`Welcome ${teacherName}! Teacher account verified.`, 'success');
-    
+
     setTimeout(() => {
       document.getElementById('login-overlay').style.display = 'none';
       setSectionsVisibility(true);
@@ -3991,14 +4003,14 @@ function handleOfficialVerification() {
   const officialId = document.getElementById('official-id').value;
   const officialName = document.getElementById('official-name').value;
   const officialPhone = document.getElementById('official-phone').value;
-  
+
   if (!orgName || !orgType || !officialId || !officialName || !officialPhone) {
     showMessage('Please fill all required fields', 'error');
     return;
   }
-  
+
   showMessage('Verifying official credentials...', 'info');
-  
+
   setTimeout(() => {
     const officialData = {
       role: 'government',
@@ -4010,14 +4022,14 @@ function handleOfficialVerification() {
       registrationDate: new Date().toISOString(),
       permissions: ['view_analytics', 'audit_submissions', 'generate_reports']
     };
-    
+
     localStorage.setItem('ecoUserData', JSON.stringify(officialData));
     localStorage.setItem('ecoUserName', officialName);
     localStorage.setItem('ecoUserRole', 'government');
     localStorage.setItem('ecoLoggedIn', 'true');
-    
+
     showMessage(`Welcome ${officialName}! Official account verified.`, 'success');
-    
+
     setTimeout(() => {
       document.getElementById('login-overlay').style.display = 'none';
       setSectionsVisibility(true);
@@ -4044,7 +4056,7 @@ function initializeGovernmentDashboard() {
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize onboarding system
   initializeOnboarding();
-  
+
   // Login gating
   const loginOverlay = document.getElementById("login-overlay");
   const loginSubmit = document.getElementById("login-submit");
@@ -4116,14 +4128,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("quiz-back-btn")
     .addEventListener("click", goBackToCategories);
-    
+
   // Initialize new features
   initializeAIFeatures();
   initializeLocationFeatures();
-  
+
   // Initialize points display
   updatePointsDisplay();
-  
+
   // Restore completed challenges state
   restoreCompletedChallenges();
 });
@@ -4133,7 +4145,7 @@ function restoreCompletedChallenges() {
   const today = new Date().toDateString();
   const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '{}');
   const todayCompleted = completedChallenges[today] || [];
-  
+
   // Find all challenge buttons and mark completed ones
   const challengeButtons = document.querySelectorAll('.challenge-btn');
   challengeButtons.forEach(button => {
@@ -4654,12 +4666,62 @@ function initializeUtilities() {
   });
 }
 
+// Profile Management
+function updateProfileDisplay() {
+  const currentUser = JSON.parse(localStorage.getItem('ecolearn_current_user') || 'null');
+  const profileSection = document.getElementById('profile');
+
+  if (!profileSection) return;
+
+  if (currentUser) {
+    // Show profile section
+    profileSection.style.display = 'block';
+
+    // Update profile information
+    const profileName = document.getElementById('profile-name');
+    const profilePoints = document.getElementById('profile-points');
+    const profileQuizzes = document.getElementById('profile-quizzes');
+    const profileBest = document.getElementById('profile-best');
+
+    if (profileName) profileName.textContent = currentUser.name || 'User';
+    if (profilePoints) profilePoints.textContent = currentUser.ecoPoints || 0;
+    if (profileQuizzes) profileQuizzes.textContent = currentUser.completedChallenges?.length || 0;
+    if (profileBest) profileBest.textContent = (currentUser.bestQuizScore || 0) + '%';
+
+    // Update quiz history
+    updateQuizHistory(currentUser);
+  } else {
+    // Hide profile section when not logged in
+    profileSection.style.display = 'none';
+  }
+}
+
+function updateQuizHistory(user) {
+  const historyList = document.getElementById('profile-history-list');
+  if (!historyList) return;
+
+  const quizHistory = user.quizHistory || [];
+
+  if (quizHistory.length === 0) {
+    historyList.innerHTML = '<div class="history-item">No quiz history yet. Take a quiz to see your results here!</div>';
+    return;
+  }
+
+  historyList.innerHTML = quizHistory.slice(-5).reverse().map(quiz => `
+    <div class="history-item">
+      <span>${quiz.date || 'Recent'}</span>
+      <span>${quiz.score || 0}% - ${quiz.category || 'General Quiz'}</span>
+    </div>
+  `).join('');
+}
+
 // Initialize everything
 document.addEventListener("DOMContentLoaded", function () {
   initializeFactorsToggle();
   initializeRoadmap();
   updatePointsDisplay();
   initializeInnovationSection();
+  updateProfileDisplay();
   initializeAICamera();
   initializeGallery();
   initializeContactForm();
@@ -4700,215 +4762,215 @@ document.addEventListener("DOMContentLoaded", function () {
 
   console.log("🚀 EcoLearn website initialized successfully!");
 
-// Advanced Trash Sorter Game Implementation
-function initTrashSorterGame() {
-  const gameState = {
-    score: 0,
-    timeLeft: 60,
-    level: 1,
-    streak: 0,
-    isPlaying: false,
-    isPaused: false,
-    gameInterval: null,
-    spawnInterval: null,
-    fallSpeed: 2,
-    spawnRate: 2000,
-    fallingItems: []
-  };
+  // Advanced Trash Sorter Game Implementation
+  function initTrashSorterGame() {
+    const gameState = {
+      score: 0,
+      timeLeft: 60,
+      level: 1,
+      streak: 0,
+      isPlaying: false,
+      isPaused: false,
+      gameInterval: null,
+      spawnInterval: null,
+      fallSpeed: 2,
+      spawnRate: 2000,
+      fallingItems: []
+    };
 
-  const trashItems = [
-    // Plastic items
-    { type: "plastic", emoji: "🧴", name: "Bottle" },
-    { type: "plastic", emoji: "🥤", name: "Cup" },
-    { type: "plastic", emoji: "🛍️", name: "Bag" },
-    { type: "plastic", emoji: "🍽️", name: "Plate" },
-    
-    // Paper items
-    { type: "paper", emoji: "📄", name: "Paper" },
-    { type: "paper", emoji: "📰", name: "Newspaper" },
-    { type: "paper", emoji: "📦", name: "Box" },
-    { type: "paper", emoji: "📚", name: "Book" },
-    
-    // Organic items
-    { type: "organic", emoji: "🍎", name: "Apple" },
-    { type: "organic", emoji: "🍌", name: "Banana" },
-    { type: "organic", emoji: "🥕", name: "Carrot" },
-    { type: "organic", emoji: "🍞", name: "Bread" },
-    
-    // Metal items
-    { type: "metal", emoji: "🥫", name: "Can" },
-    { type: "metal", emoji: "🔧", name: "Tool" },
-    { type: "metal", emoji: "🪙", name: "Coin" },
-    { type: "metal", emoji: "📎", name: "Clip" },
-    
-    // Glass items
-    { type: "glass", emoji: "🍾", name: "Bottle" },
-    { type: "glass", emoji: "🥛", name: "Glass" },
-    { type: "glass", emoji: "💡", name: "Bulb" },
-    { type: "glass", emoji: "🪟", name: "Mirror" }
-  ];
+    const trashItems = [
+      // Plastic items
+      { type: "plastic", emoji: "🧴", name: "Bottle" },
+      { type: "plastic", emoji: "🥤", name: "Cup" },
+      { type: "plastic", emoji: "🛍️", name: "Bag" },
+      { type: "plastic", emoji: "🍽️", name: "Plate" },
 
-  const elements = {
-    scoreEl: document.getElementById('trash-score'),
-    timerEl: document.getElementById('trash-timer'),
-    levelEl: document.getElementById('trash-level'),
-    streakEl: document.getElementById('trash-streak'),
-    gameArea: document.getElementById('trash-game-area'),
-    fallingZone: document.querySelector('.falling-items-zone'),
-    bins: document.querySelectorAll('.trash-bin'),
-    startBtn: document.getElementById('start-trash-game'),
-    pauseBtn: document.getElementById('pause-trash-game'),
-    resetBtn: document.getElementById('reset-trash-game'),
-    binCounters: {}
-  };
+      // Paper items
+      { type: "paper", emoji: "📄", name: "Paper" },
+      { type: "paper", emoji: "📰", name: "Newspaper" },
+      { type: "paper", emoji: "📦", name: "Box" },
+      { type: "paper", emoji: "📚", name: "Book" },
 
-  // Initialize bin counters
-  elements.bins.forEach(bin => {
-    const type = bin.dataset.type;
-    elements.binCounters[type] = bin.querySelector('.bin-counter');
-  });
+      // Organic items
+      { type: "organic", emoji: "🍎", name: "Apple" },
+      { type: "organic", emoji: "🍌", name: "Banana" },
+      { type: "organic", emoji: "🥕", name: "Carrot" },
+      { type: "organic", emoji: "🍞", name: "Bread" },
 
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.timerEl.textContent = gameState.timeLeft;
-    elements.levelEl.textContent = gameState.level;
-    elements.streakEl.textContent = gameState.streak;
-  }
+      // Metal items
+      { type: "metal", emoji: "🥫", name: "Can" },
+      { type: "metal", emoji: "🔧", name: "Tool" },
+      { type: "metal", emoji: "🪙", name: "Coin" },
+      { type: "metal", emoji: "📎", name: "Clip" },
 
-  function createFallingItem() {
-    const randomItem = trashItems[Math.floor(Math.random() * trashItems.length)];
-    const item = document.createElement('div');
-    item.className = 'falling-item';
-    item.textContent = randomItem.emoji;
-    item.dataset.type = randomItem.type;
-    item.dataset.name = randomItem.name;
-    
-    // Random horizontal position
-    const maxX = elements.fallingZone.offsetWidth - 50;
-    item.style.left = Math.random() * maxX + 'px';
-    item.style.top = '0px';
-    
-    elements.fallingZone.appendChild(item);
-    gameState.fallingItems.push({
-      element: item,
-      x: parseInt(item.style.left),
-      y: 0,
-      type: randomItem.type
+      // Glass items
+      { type: "glass", emoji: "🍾", name: "Bottle" },
+      { type: "glass", emoji: "🥛", name: "Glass" },
+      { type: "glass", emoji: "💡", name: "Bulb" },
+      { type: "glass", emoji: "🪟", name: "Mirror" }
+    ];
+
+    const elements = {
+      scoreEl: document.getElementById('trash-score'),
+      timerEl: document.getElementById('trash-timer'),
+      levelEl: document.getElementById('trash-level'),
+      streakEl: document.getElementById('trash-streak'),
+      gameArea: document.getElementById('trash-game-area'),
+      fallingZone: document.querySelector('.falling-items-zone'),
+      bins: document.querySelectorAll('.trash-bin'),
+      startBtn: document.getElementById('start-trash-game'),
+      pauseBtn: document.getElementById('pause-trash-game'),
+      resetBtn: document.getElementById('reset-trash-game'),
+      binCounters: {}
+    };
+
+    // Initialize bin counters
+    elements.bins.forEach(bin => {
+      const type = bin.dataset.type;
+      elements.binCounters[type] = bin.querySelector('.bin-counter');
     });
 
-    // Make item draggable
-    makeDraggable(item);
-    
-    return item;
-  }
-
-  function makeDraggable(item) {
-    let isDragging = false;
-    let startX, startY, offsetX, offsetY;
-
-    item.addEventListener('mousedown', startDrag);
-    item.addEventListener('touchstart', startDrag);
-
-    function startDrag(e) {
-      isDragging = true;
-      item.classList.add('dragging');
-      
-      const clientX = e.clientX || e.touches[0].clientX;
-      const clientY = e.clientY || e.touches[0].clientY;
-      const rect = item.getBoundingClientRect();
-      
-      offsetX = clientX - rect.left;
-      offsetY = clientY - rect.top;
-      
-      document.addEventListener('mousemove', drag);
-      document.addEventListener('touchmove', drag);
-      document.addEventListener('mouseup', stopDrag);
-      document.addEventListener('touchend', stopDrag);
-      
-      e.preventDefault();
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.timerEl.textContent = gameState.timeLeft;
+      elements.levelEl.textContent = gameState.level;
+      elements.streakEl.textContent = gameState.streak;
     }
 
-    function drag(e) {
-      if (!isDragging) return;
-      
-      const clientX = e.clientX || e.touches[0].clientX;
-      const clientY = e.clientY || e.touches[0].clientY;
-      
-      item.style.left = (clientX - offsetX) + 'px';
-      item.style.top = (clientY - offsetY) + 'px';
-      item.style.zIndex = '1000';
+    function createFallingItem() {
+      const randomItem = trashItems[Math.floor(Math.random() * trashItems.length)];
+      const item = document.createElement('div');
+      item.className = 'falling-item';
+      item.textContent = randomItem.emoji;
+      item.dataset.type = randomItem.type;
+      item.dataset.name = randomItem.name;
+
+      // Random horizontal position
+      const maxX = elements.fallingZone.offsetWidth - 50;
+      item.style.left = Math.random() * maxX + 'px';
+      item.style.top = '0px';
+
+      elements.fallingZone.appendChild(item);
+      gameState.fallingItems.push({
+        element: item,
+        x: parseInt(item.style.left),
+        y: 0,
+        type: randomItem.type
+      });
+
+      // Make item draggable
+      makeDraggable(item);
+
+      return item;
     }
 
-    function stopDrag(e) {
-      if (!isDragging) return;
-      isDragging = false;
-      item.classList.remove('dragging');
-      
-      // Check if dropped on a bin
-      const dropTarget = getDropTarget(e);
-      if (dropTarget) {
-        handleDrop(item, dropTarget);
+    function makeDraggable(item) {
+      let isDragging = false;
+      let startX, startY, offsetX, offsetY;
+
+      item.addEventListener('mousedown', startDrag);
+      item.addEventListener('touchstart', startDrag);
+
+      function startDrag(e) {
+        isDragging = true;
+        item.classList.add('dragging');
+
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        const rect = item.getBoundingClientRect();
+
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+
+        e.preventDefault();
       }
-      
-      document.removeEventListener('mousemove', drag);
-      document.removeEventListener('touchmove', drag);
-      document.removeEventListener('mouseup', stopDrag);
-      document.removeEventListener('touchend', stopDrag);
+
+      function drag(e) {
+        if (!isDragging) return;
+
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+
+        item.style.left = (clientX - offsetX) + 'px';
+        item.style.top = (clientY - offsetY) + 'px';
+        item.style.zIndex = '1000';
+      }
+
+      function stopDrag(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        item.classList.remove('dragging');
+
+        // Check if dropped on a bin
+        const dropTarget = getDropTarget(e);
+        if (dropTarget) {
+          handleDrop(item, dropTarget);
+        }
+
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('touchmove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchend', stopDrag);
+      }
     }
-  }
 
-  function getDropTarget(e) {
-    const clientX = e.clientX || e.changedTouches[0].clientX;
-    const clientY = e.clientY || e.changedTouches[0].clientY;
-    
-    return document.elementFromPoint(clientX, clientY)?.closest('.trash-bin');
-  }
+    function getDropTarget(e) {
+      const clientX = e.clientX || e.changedTouches[0].clientX;
+      const clientY = e.clientY || e.changedTouches[0].clientY;
 
-  function handleDrop(item, bin) {
-    const itemType = item.dataset.type;
-    const binType = bin.dataset.type;
-    const isCorrect = itemType === binType;
-    
-    if (isCorrect) {
-      // Correct drop
-      gameState.score += 10 + (gameState.streak * 2);
-      gameState.streak++;
-      bin.classList.add('correct-drop');
-      
-      // Update bin counter
-      const currentCount = parseInt(elements.binCounters[binType].textContent);
-      elements.binCounters[binType].textContent = currentCount + 1;
-      
-      // Show success message
-      showFloatingMessage('+' + (10 + (gameState.streak * 2)), item, '#4CAF50');
-      
-    } else {
-      // Wrong drop
-      gameState.score = Math.max(0, gameState.score - 5);
-      gameState.streak = 0;
-      bin.classList.add('wrong-drop');
-      
-      // Show error message
-      showFloatingMessage('-5', item, '#f44336');
+      return document.elementFromPoint(clientX, clientY)?.closest('.trash-bin');
     }
-    
-    // Remove item
-    removeItem(item);
-    
-    // Remove animation class after animation
-    setTimeout(() => {
-      bin.classList.remove('correct-drop', 'wrong-drop');
-    }, 600);
-    
-    // Check level progression
-    checkLevelUp();
-    updateUI();
-  }
 
-  function showFloatingMessage(text, item, color) {
-    const message = document.createElement('div');
-    message.textContent = text;
-    message.style.cssText = `
+    function handleDrop(item, bin) {
+      const itemType = item.dataset.type;
+      const binType = bin.dataset.type;
+      const isCorrect = itemType === binType;
+
+      if (isCorrect) {
+        // Correct drop
+        gameState.score += 10 + (gameState.streak * 2);
+        gameState.streak++;
+        bin.classList.add('correct-drop');
+
+        // Update bin counter
+        const currentCount = parseInt(elements.binCounters[binType].textContent);
+        elements.binCounters[binType].textContent = currentCount + 1;
+
+        // Show success message
+        showFloatingMessage('+' + (10 + (gameState.streak * 2)), item, '#4CAF50');
+
+      } else {
+        // Wrong drop
+        gameState.score = Math.max(0, gameState.score - 5);
+        gameState.streak = 0;
+        bin.classList.add('wrong-drop');
+
+        // Show error message
+        showFloatingMessage('-5', item, '#f44336');
+      }
+
+      // Remove item
+      removeItem(item);
+
+      // Remove animation class after animation
+      setTimeout(() => {
+        bin.classList.remove('correct-drop', 'wrong-drop');
+      }, 600);
+
+      // Check level progression
+      checkLevelUp();
+      updateUI();
+    }
+
+    function showFloatingMessage(text, item, color) {
+      const message = document.createElement('div');
+      message.textContent = text;
+      message.style.cssText = `
       position: absolute;
       left: ${item.style.left};
       top: ${item.style.top};
@@ -4918,481 +4980,481 @@ function initTrashSorterGame() {
       pointer-events: none;
       z-index: 1001;
     `;
-    
-    elements.fallingZone.appendChild(message);
-    
-    // Animate message
-    gsap.to(message, {
-      duration: 1,
-      y: -50,
-      opacity: 0,
-      scale: 1.5,
-      ease: "power2.out",
-      onComplete: () => message.remove()
-    });
-  }
 
-  function removeItem(item) {
-    const index = gameState.fallingItems.findIndex(fi => fi.element === item);
-    if (index > -1) {
-      gameState.fallingItems.splice(index, 1);
+      elements.fallingZone.appendChild(message);
+
+      // Animate message
+      gsap.to(message, {
+        duration: 1,
+        y: -50,
+        opacity: 0,
+        scale: 1.5,
+        ease: "power2.out",
+        onComplete: () => message.remove()
+      });
     }
-    item.remove();
-  }
 
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.score / 100) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      gameState.fallSpeed += 0.5;
-      gameState.spawnRate = Math.max(1000, gameState.spawnRate - 200);
-      
-      // Restart spawn interval with new rate
-      if (gameState.spawnInterval) {
-        clearInterval(gameState.spawnInterval);
-        gameState.spawnInterval = setInterval(createFallingItem, gameState.spawnRate);
+    function removeItem(item) {
+      const index = gameState.fallingItems.findIndex(fi => fi.element === item);
+      if (index > -1) {
+        gameState.fallingItems.splice(index, 1);
       }
-      
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+      item.remove();
     }
-  }
 
-  function updateFallingItems() {
-    gameState.fallingItems.forEach((item, index) => {
-      item.y += gameState.fallSpeed;
-      item.element.style.top = item.y + 'px';
-      
-      // Remove items that fall off screen
-      if (item.y > elements.fallingZone.offsetHeight) {
-        removeItem(item.element);
-        gameState.streak = 0; // Reset streak for missed items
-      }
-    });
-  }
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.score / 100) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+        gameState.fallSpeed += 0.5;
+        gameState.spawnRate = Math.max(1000, gameState.spawnRate - 200);
 
-  function startGame() {
-    if (gameState.isPlaying) return;
-    
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    // Start game timer
-    gameState.gameInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        updateFallingItems();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
+        // Restart spawn interval with new rate
+        if (gameState.spawnInterval) {
+          clearInterval(gameState.spawnInterval);
+          gameState.spawnInterval = setInterval(createFallingItem, gameState.spawnRate);
         }
-      }
-    }, 1000);
-    
-    // Start spawning items
-    gameState.spawnInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        createFallingItem();
-      }
-    }, gameState.spawnRate);
-    
-    showMessage('Game Started! Drag items to correct bins!', 'info');
-  }
 
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+      }
     }
-  }
 
-  function resetGame() {
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    
-    // Clear falling items
-    gameState.fallingItems.forEach(item => item.element.remove());
-    gameState.fallingItems = [];
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.timeLeft = 60;
-    gameState.level = 1;
-    gameState.streak = 0;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    gameState.fallSpeed = 2;
-    gameState.spawnRate = 2000;
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
-    // Reset bin counters
-    Object.values(elements.binCounters).forEach(counter => {
-      counter.textContent = '0';
+    function updateFallingItems() {
+      gameState.fallingItems.forEach((item, index) => {
+        item.y += gameState.fallSpeed;
+        item.element.style.top = item.y + 'px';
+
+        // Remove items that fall off screen
+        if (item.y > elements.fallingZone.offsetHeight) {
+          removeItem(item.element);
+          gameState.streak = 0; // Reset streak for missed items
+        }
+      });
+    }
+
+    function startGame() {
+      if (gameState.isPlaying) return;
+
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+
+      // Start game timer
+      gameState.gameInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
+          updateFallingItems();
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          }
+        }
+      }, 1000);
+
+      // Start spawning items
+      gameState.spawnInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          createFallingItem();
+        }
+      }, gameState.spawnRate);
+
+      showMessage('Game Started! Drag items to correct bins!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+
+      // Clear falling items
+      gameState.fallingItems.forEach(item => item.element.remove());
+      gameState.fallingItems = [];
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.timeLeft = 60;
+      gameState.level = 1;
+      gameState.streak = 0;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+      gameState.fallSpeed = 2;
+      gameState.spawnRate = 2000;
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      // Reset bin counters
+      Object.values(elements.binCounters).forEach(counter => {
+        counter.textContent = '0';
+      });
+
+      updateUI();
+      showMessage('Game Reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`Trash Sorter Game (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 100) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Initialize drag and drop for bins
+    elements.bins.forEach(bin => {
+      bin.addEventListener('dragover', e => e.preventDefault());
+      bin.addEventListener('drop', e => {
+        e.preventDefault();
+        const draggedItem = document.querySelector('.falling-item.dragging');
+        if (draggedItem) {
+          handleDrop(draggedItem, bin);
+        }
+      });
     });
-    
+
+    // Initialize UI
     updateUI();
-    showMessage('Game Reset!', 'info');
+    showMessage('Advanced Trash Sorter loaded! Click Start to begin!', 'info');
   }
 
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`Trash Sorter Game (Score: ${finalScore})`, pointsEarned);
-    }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 100) {
-      addConfetti();
-    }
-  }
-
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
-
-  // Initialize drag and drop for bins
-  elements.bins.forEach(bin => {
-    bin.addEventListener('dragover', e => e.preventDefault());
-    bin.addEventListener('drop', e => {
-      e.preventDefault();
-      const draggedItem = document.querySelector('.falling-item.dragging');
-      if (draggedItem) {
-        handleDrop(draggedItem, bin);
+  // Plant the Tree Game Implementation
+  function initPlantTreeGame() {
+    const gameState = {
+      score: 0,
+      treesPlanted: 0,
+      level: 1,
+      co2Saved: 0,
+      energy: 100,
+      isPlaying: false,
+      autoWaterEnabled: false,
+      plants: [],
+      achievements: {
+        'first-tree': false,
+        'forest-maker': false,
+        'eco-warrior': false
       }
-    });
-  });
-
-  // Initialize UI
-  updateUI();
-  showMessage('Advanced Trash Sorter loaded! Click Start to begin!', 'info');
-}
-
-// Plant the Tree Game Implementation
-function initPlantTreeGame() {
-  const gameState = {
-    score: 0,
-    treesPlanted: 0,
-    level: 1,
-    co2Saved: 0,
-    energy: 100,
-    isPlaying: false,
-    autoWaterEnabled: false,
-    plants: [],
-    achievements: {
-      'first-tree': false,
-      'forest-maker': false,
-      'eco-warrior': false
-    }
-  };
-
-  const plantStages = [
-    { emoji: '🌰', name: 'Seed', stage: 0 },
-    { emoji: '🌱', name: 'Sprout', stage: 1 },
-    { emoji: '🌿', name: 'Sapling', stage: 2 },
-    { emoji: '🌳', name: 'Tree', stage: 3 }
-  ];
-
-  const elements = {
-    scoreEl: document.getElementById('plant-score'),
-    treesEl: document.getElementById('trees-planted'),
-    levelEl: document.getElementById('plant-level'),
-    co2El: document.getElementById('co2-saved'),
-    garden: document.getElementById('plant-garden'),
-    plantsContainer: document.getElementById('plants-container'),
-    waterBtn: document.getElementById('water-btn'),
-    sunBtn: document.getElementById('sun-btn'),
-    fertilizerBtn: document.getElementById('fertilizer-btn'),
-    plantSeedBtn: document.getElementById('plant-seed-btn'),
-    startBtn: document.getElementById('start-plant-game'),
-    autoWaterBtn: document.getElementById('auto-water'),
-    resetBtn: document.getElementById('reset-plant-game'),
-    sunIndicator: document.getElementById('sun-indicator'),
-    weatherEffects: document.getElementById('weather-effects'),
-    achievementsContainer: document.getElementById('plant-achievements')
-  };
-
-  let selectedPlant = null;
-  let autoWaterInterval = null;
-  let weatherInterval = null;
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.treesEl.textContent = gameState.treesPlanted;
-    elements.levelEl.textContent = gameState.level;
-    elements.co2El.textContent = gameState.co2Saved;
-    
-    // Update button states based on energy
-    elements.waterBtn.disabled = gameState.energy < 5;
-    elements.sunBtn.disabled = gameState.energy < 3;
-    elements.fertilizerBtn.disabled = gameState.energy < 10;
-    elements.plantSeedBtn.disabled = gameState.energy < 15;
-  }
-
-  function createPlant(x, y) {
-    const plant = {
-      id: Date.now(),
-      x: x,
-      y: y,
-      stage: 0,
-      health: 100,
-      waterLevel: 50,
-      sunLevel: 50,
-      growthTimer: 0,
-      element: null
     };
 
-    const plantElement = document.createElement('div');
-    plantElement.className = 'plant';
-    plantElement.textContent = plantStages[0].emoji;
-    plantElement.style.left = x + 'px';
-    plantElement.style.bottom = y + 'px';
-    plantElement.dataset.plantId = plant.id;
-    
-    plantElement.addEventListener('click', () => selectPlant(plant));
-    
-    elements.plantsContainer.appendChild(plantElement);
-    plant.element = plantElement;
-    
-    gameState.plants.push(plant);
-    
-    // Animation
-    plantElement.classList.add('growing');
-    setTimeout(() => plantElement.classList.remove('growing'), 1000);
-    
-    return plant;
-  }
+    const plantStages = [
+      { emoji: '🌰', name: 'Seed', stage: 0 },
+      { emoji: '🌱', name: 'Sprout', stage: 1 },
+      { emoji: '🌿', name: 'Sapling', stage: 2 },
+      { emoji: '🌳', name: 'Tree', stage: 3 }
+    ];
 
-  function selectPlant(plant) {
-    // Remove selection from other plants
-    document.querySelectorAll('.plant').forEach(p => p.classList.remove('selected'));
-    
-    // Select current plant
-    plant.element.classList.add('selected');
-    selectedPlant = plant;
-    
-    showMessage(`Selected ${plantStages[plant.stage].name}`, 'info');
-  }
+    const elements = {
+      scoreEl: document.getElementById('plant-score'),
+      treesEl: document.getElementById('trees-planted'),
+      levelEl: document.getElementById('plant-level'),
+      co2El: document.getElementById('co2-saved'),
+      garden: document.getElementById('plant-garden'),
+      plantsContainer: document.getElementById('plants-container'),
+      waterBtn: document.getElementById('water-btn'),
+      sunBtn: document.getElementById('sun-btn'),
+      fertilizerBtn: document.getElementById('fertilizer-btn'),
+      plantSeedBtn: document.getElementById('plant-seed-btn'),
+      startBtn: document.getElementById('start-plant-game'),
+      autoWaterBtn: document.getElementById('auto-water'),
+      resetBtn: document.getElementById('reset-plant-game'),
+      sunIndicator: document.getElementById('sun-indicator'),
+      weatherEffects: document.getElementById('weather-effects'),
+      achievementsContainer: document.getElementById('plant-achievements')
+    };
 
-  function plantSeed() {
-    if (gameState.energy < 15) {
-      showMessage('Not enough energy to plant seed!', 'warning');
-      return;
+    let selectedPlant = null;
+    let autoWaterInterval = null;
+    let weatherInterval = null;
+
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.treesEl.textContent = gameState.treesPlanted;
+      elements.levelEl.textContent = gameState.level;
+      elements.co2El.textContent = gameState.co2Saved;
+
+      // Update button states based on energy
+      elements.waterBtn.disabled = gameState.energy < 5;
+      elements.sunBtn.disabled = gameState.energy < 3;
+      elements.fertilizerBtn.disabled = gameState.energy < 10;
+      elements.plantSeedBtn.disabled = gameState.energy < 15;
     }
 
-    // Random position in garden
-    const maxX = elements.plantsContainer.offsetWidth - 50;
-    const x = Math.random() * maxX;
-    const y = 0;
-    
-    createPlant(x, y);
-    gameState.energy -= 15;
-    gameState.score += 5;
-    
-    updateUI();
-    showMessage('Seed planted! 🌰', 'success');
-  }
+    function createPlant(x, y) {
+      const plant = {
+        id: Date.now(),
+        x: x,
+        y: y,
+        stage: 0,
+        health: 100,
+        waterLevel: 50,
+        sunLevel: 50,
+        growthTimer: 0,
+        element: null
+      };
 
-  function waterPlant() {
-    if (!selectedPlant) {
-      showMessage('Select a plant first!', 'warning');
-      return;
-    }
-    
-    if (gameState.energy < 5) {
-      showMessage('Not enough energy!', 'warning');
-      return;
-    }
+      const plantElement = document.createElement('div');
+      plantElement.className = 'plant';
+      plantElement.textContent = plantStages[0].emoji;
+      plantElement.style.left = x + 'px';
+      plantElement.style.bottom = y + 'px';
+      plantElement.dataset.plantId = plant.id;
 
-    selectedPlant.waterLevel = Math.min(100, selectedPlant.waterLevel + 30);
-    selectedPlant.element.classList.add('watered');
-    setTimeout(() => selectedPlant.element.classList.remove('watered'), 800);
-    
-    gameState.energy -= 5;
-    gameState.score += 2;
-    
-    // Create water effect
-    createWaterEffect(selectedPlant.element);
-    
-    updateUI();
-    showMessage('Plant watered! 💧', 'success');
-    
-    // Check for growth
-    checkPlantGrowth(selectedPlant);
-  }
+      plantElement.addEventListener('click', () => selectPlant(plant));
 
-  function giveSunlight() {
-    if (!selectedPlant) {
-      showMessage('Select a plant first!', 'warning');
-      return;
-    }
-    
-    if (gameState.energy < 3) {
-      showMessage('Not enough energy!', 'warning');
-      return;
+      elements.plantsContainer.appendChild(plantElement);
+      plant.element = plantElement;
+
+      gameState.plants.push(plant);
+
+      // Animation
+      plantElement.classList.add('growing');
+      setTimeout(() => plantElement.classList.remove('growing'), 1000);
+
+      return plant;
     }
 
-    selectedPlant.sunLevel = Math.min(100, selectedPlant.sunLevel + 25);
-    gameState.energy -= 3;
-    gameState.score += 2;
-    
-    // Sun effect
-    createSunEffect(selectedPlant.element);
-    
-    updateUI();
-    showMessage('Sunlight provided! ☀️', 'success');
-    
-    // Check for growth
-    checkPlantGrowth(selectedPlant);
-  }
+    function selectPlant(plant) {
+      // Remove selection from other plants
+      document.querySelectorAll('.plant').forEach(p => p.classList.remove('selected'));
 
-  function useFertilizer() {
-    if (!selectedPlant) {
-      showMessage('Select a plant first!', 'warning');
-      return;
-    }
-    
-    if (gameState.energy < 10) {
-      showMessage('Not enough energy!', 'warning');
-      return;
+      // Select current plant
+      plant.element.classList.add('selected');
+      selectedPlant = plant;
+
+      showMessage(`Selected ${plantStages[plant.stage].name}`, 'info');
     }
 
-    selectedPlant.waterLevel = Math.min(100, selectedPlant.waterLevel + 20);
-    selectedPlant.sunLevel = Math.min(100, selectedPlant.sunLevel + 20);
-    selectedPlant.health = Math.min(100, selectedPlant.health + 30);
-    
-    selectedPlant.element.classList.add('fertilized');
-    setTimeout(() => selectedPlant.element.classList.remove('fertilized'), 1000);
-    
-    gameState.energy -= 10;
-    gameState.score += 5;
-    
-    updateUI();
-    showMessage('Fertilizer applied! 🧪', 'success');
-    
-    // Force growth check
-    checkPlantGrowth(selectedPlant);
-  }
-
-  function checkPlantGrowth(plant) {
-    if (plant.stage >= 3) return; // Already fully grown
-    
-    const canGrow = plant.waterLevel > 30 && plant.sunLevel > 30 && plant.health > 50;
-    
-    if (canGrow) {
-      plant.stage++;
-      plant.element.textContent = plantStages[plant.stage].emoji;
-      plant.element.classList.add('growing');
-      setTimeout(() => plant.element.classList.remove('growing'), 1000);
-      
-      // Reset levels after growth
-      plant.waterLevel = Math.max(20, plant.waterLevel - 20);
-      plant.sunLevel = Math.max(20, plant.sunLevel - 20);
-      
-      gameState.score += plant.stage * 10;
-      
-      if (plant.stage === 3) {
-        // Fully grown tree
-        gameState.treesPlanted++;
-        gameState.co2Saved += 22; // Average CO2 absorbed by a tree per year
-        
-        showMessage('Tree fully grown! 🌳 +22kg CO₂ saved!', 'success');
-        checkAchievements();
-        
-        // Confetti for tree completion
-        addConfetti();
-      } else {
-        showMessage(`Plant grew to ${plantStages[plant.stage].name}!`, 'success');
+    function plantSeed() {
+      if (gameState.energy < 15) {
+        showMessage('Not enough energy to plant seed!', 'warning');
+        return;
       }
-      
+
+      // Random position in garden
+      const maxX = elements.plantsContainer.offsetWidth - 50;
+      const x = Math.random() * maxX;
+      const y = 0;
+
+      createPlant(x, y);
+      gameState.energy -= 15;
+      gameState.score += 5;
+
       updateUI();
-      checkLevelUp();
+      showMessage('Seed planted! 🌰', 'success');
     }
-  }
 
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.treesPlanted / 3) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      gameState.energy = 100; // Restore energy on level up
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+    function waterPlant() {
+      if (!selectedPlant) {
+        showMessage('Select a plant first!', 'warning');
+        return;
+      }
+
+      if (gameState.energy < 5) {
+        showMessage('Not enough energy!', 'warning');
+        return;
+      }
+
+      selectedPlant.waterLevel = Math.min(100, selectedPlant.waterLevel + 30);
+      selectedPlant.element.classList.add('watered');
+      setTimeout(() => selectedPlant.element.classList.remove('watered'), 800);
+
+      gameState.energy -= 5;
+      gameState.score += 2;
+
+      // Create water effect
+      createWaterEffect(selectedPlant.element);
+
+      updateUI();
+      showMessage('Plant watered! 💧', 'success');
+
+      // Check for growth
+      checkPlantGrowth(selectedPlant);
+    }
+
+    function giveSunlight() {
+      if (!selectedPlant) {
+        showMessage('Select a plant first!', 'warning');
+        return;
+      }
+
+      if (gameState.energy < 3) {
+        showMessage('Not enough energy!', 'warning');
+        return;
+      }
+
+      selectedPlant.sunLevel = Math.min(100, selectedPlant.sunLevel + 25);
+      gameState.energy -= 3;
+      gameState.score += 2;
+
+      // Sun effect
+      createSunEffect(selectedPlant.element);
+
+      updateUI();
+      showMessage('Sunlight provided! ☀️', 'success');
+
+      // Check for growth
+      checkPlantGrowth(selectedPlant);
+    }
+
+    function useFertilizer() {
+      if (!selectedPlant) {
+        showMessage('Select a plant first!', 'warning');
+        return;
+      }
+
+      if (gameState.energy < 10) {
+        showMessage('Not enough energy!', 'warning');
+        return;
+      }
+
+      selectedPlant.waterLevel = Math.min(100, selectedPlant.waterLevel + 20);
+      selectedPlant.sunLevel = Math.min(100, selectedPlant.sunLevel + 20);
+      selectedPlant.health = Math.min(100, selectedPlant.health + 30);
+
+      selectedPlant.element.classList.add('fertilized');
+      setTimeout(() => selectedPlant.element.classList.remove('fertilized'), 1000);
+
+      gameState.energy -= 10;
+      gameState.score += 5;
+
+      updateUI();
+      showMessage('Fertilizer applied! 🧪', 'success');
+
+      // Force growth check
+      checkPlantGrowth(selectedPlant);
+    }
+
+    function checkPlantGrowth(plant) {
+      if (plant.stage >= 3) return; // Already fully grown
+
+      const canGrow = plant.waterLevel > 30 && plant.sunLevel > 30 && plant.health > 50;
+
+      if (canGrow) {
+        plant.stage++;
+        plant.element.textContent = plantStages[plant.stage].emoji;
+        plant.element.classList.add('growing');
+        setTimeout(() => plant.element.classList.remove('growing'), 1000);
+
+        // Reset levels after growth
+        plant.waterLevel = Math.max(20, plant.waterLevel - 20);
+        plant.sunLevel = Math.max(20, plant.sunLevel - 20);
+
+        gameState.score += plant.stage * 10;
+
+        if (plant.stage === 3) {
+          // Fully grown tree
+          gameState.treesPlanted++;
+          gameState.co2Saved += 22; // Average CO2 absorbed by a tree per year
+
+          showMessage('Tree fully grown! 🌳 +22kg CO₂ saved!', 'success');
+          checkAchievements();
+
+          // Confetti for tree completion
+          addConfetti();
+        } else {
+          showMessage(`Plant grew to ${plantStages[plant.stage].name}!`, 'success');
+        }
+
+        updateUI();
+        checkLevelUp();
+      }
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.treesPlanted / 3) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+        gameState.energy = 100; // Restore energy on level up
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+        updateUI();
+      }
+    }
+
+    function checkAchievements() {
+      // First Tree
+      if (gameState.treesPlanted >= 1 && !gameState.achievements['first-tree']) {
+        unlockAchievement('first-tree', 'First Tree! 🌱');
+      }
+
+      // Forest Maker
+      if (gameState.treesPlanted >= 5 && !gameState.achievements['forest-maker']) {
+        unlockAchievement('forest-maker', 'Forest Maker! 🌲');
+      }
+
+      // Eco Warrior
+      if (gameState.co2Saved >= 100 && !gameState.achievements['eco-warrior']) {
+        unlockAchievement('eco-warrior', 'Eco Warrior! 🌍');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
+      if (achievementEl) {
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
+      }
+
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 50; // Bonus points for achievements
       updateUI();
     }
-  }
 
-  function checkAchievements() {
-    // First Tree
-    if (gameState.treesPlanted >= 1 && !gameState.achievements['first-tree']) {
-      unlockAchievement('first-tree', 'First Tree! 🌱');
-    }
-    
-    // Forest Maker
-    if (gameState.treesPlanted >= 5 && !gameState.achievements['forest-maker']) {
-      unlockAchievement('forest-maker', 'Forest Maker! 🌲');
-    }
-    
-    // Eco Warrior
-    if (gameState.co2Saved >= 100 && !gameState.achievements['eco-warrior']) {
-      unlockAchievement('eco-warrior', 'Eco Warrior! 🌍');
-    }
-  }
+    function createWaterEffect(plantElement) {
+      for (let i = 0; i < 5; i++) {
+        const drop = document.createElement('div');
+        drop.textContent = '💧';
+        drop.className = 'rain-drop';
+        drop.style.left = (parseInt(plantElement.style.left) + Math.random() * 30) + 'px';
+        drop.style.animationDelay = (i * 0.1) + 's';
 
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 50; // Bonus points for achievements
-    updateUI();
-  }
+        elements.weatherEffects.appendChild(drop);
 
-  function createWaterEffect(plantElement) {
-    for (let i = 0; i < 5; i++) {
-      const drop = document.createElement('div');
-      drop.textContent = '💧';
-      drop.className = 'rain-drop';
-      drop.style.left = (parseInt(plantElement.style.left) + Math.random() * 30) + 'px';
-      drop.style.animationDelay = (i * 0.1) + 's';
-      
-      elements.weatherEffects.appendChild(drop);
-      
-      setTimeout(() => drop.remove(), 2000);
+        setTimeout(() => drop.remove(), 2000);
+      }
     }
-  }
 
-  function createSunEffect(plantElement) {
-    const sunRay = document.createElement('div');
-    sunRay.textContent = '✨';
-    sunRay.style.cssText = `
+    function createSunEffect(plantElement) {
+      const sunRay = document.createElement('div');
+      sunRay.textContent = '✨';
+      sunRay.style.cssText = `
       position: absolute;
       left: ${parseInt(plantElement.style.left) + 15}px;
       bottom: 50px;
@@ -5400,166 +5462,166 @@ function initPlantTreeGame() {
       animation: sunRayEffect 1s ease-out;
       pointer-events: none;
     `;
-    
-    elements.plantsContainer.appendChild(sunRay);
-    
-    setTimeout(() => sunRay.remove(), 1000);
-  }
 
-  function toggleAutoWater() {
-    gameState.autoWaterEnabled = !gameState.autoWaterEnabled;
-    
-    if (gameState.autoWaterEnabled) {
-      elements.autoWaterBtn.textContent = '🤖 Auto Water ON';
-      elements.autoWaterBtn.style.background = '#4CAF50';
-      
-      autoWaterInterval = setInterval(() => {
+      elements.plantsContainer.appendChild(sunRay);
+
+      setTimeout(() => sunRay.remove(), 1000);
+    }
+
+    function toggleAutoWater() {
+      gameState.autoWaterEnabled = !gameState.autoWaterEnabled;
+
+      if (gameState.autoWaterEnabled) {
+        elements.autoWaterBtn.textContent = '🤖 Auto Water ON';
+        elements.autoWaterBtn.style.background = '#4CAF50';
+
+        autoWaterInterval = setInterval(() => {
+          gameState.plants.forEach(plant => {
+            if (plant.waterLevel < 40 && gameState.energy >= 5) {
+              plant.waterLevel = Math.min(100, plant.waterLevel + 20);
+              gameState.energy -= 5;
+              createWaterEffect(plant.element);
+              checkPlantGrowth(plant);
+            }
+          });
+          updateUI();
+        }, 3000);
+
+        showMessage('Auto-watering enabled!', 'info');
+      } else {
+        elements.autoWaterBtn.textContent = '🤖 Auto Water';
+        elements.autoWaterBtn.style.background = '';
+
+        if (autoWaterInterval) {
+          clearInterval(autoWaterInterval);
+          autoWaterInterval = null;
+        }
+
+        showMessage('Auto-watering disabled!', 'info');
+      }
+    }
+
+    function startGame() {
+      gameState.isPlaying = true;
+      elements.startBtn.disabled = true;
+
+      // Start weather effects
+      weatherInterval = setInterval(() => {
+        // Random weather events
+        if (Math.random() < 0.3) {
+          createRandomWeather();
+        }
+
+        // Gradually decrease plant levels
         gameState.plants.forEach(plant => {
-          if (plant.waterLevel < 40 && gameState.energy >= 5) {
-            plant.waterLevel = Math.min(100, plant.waterLevel + 20);
-            gameState.energy -= 5;
-            createWaterEffect(plant.element);
-            checkPlantGrowth(plant);
+          plant.waterLevel = Math.max(0, plant.waterLevel - 2);
+          plant.sunLevel = Math.max(0, plant.sunLevel - 1);
+
+          if (plant.waterLevel < 20 || plant.sunLevel < 20) {
+            plant.health = Math.max(0, plant.health - 1);
           }
         });
-        updateUI();
-      }, 3000);
-      
-      showMessage('Auto-watering enabled!', 'info');
-    } else {
-      elements.autoWaterBtn.textContent = '🤖 Auto Water';
-      elements.autoWaterBtn.style.background = '';
-      
-      if (autoWaterInterval) {
-        clearInterval(autoWaterInterval);
-        autoWaterInterval = null;
-      }
-      
-      showMessage('Auto-watering disabled!', 'info');
-    }
-  }
 
-  function startGame() {
-    gameState.isPlaying = true;
-    elements.startBtn.disabled = true;
-    
-    // Start weather effects
-    weatherInterval = setInterval(() => {
-      // Random weather events
-      if (Math.random() < 0.3) {
-        createRandomWeather();
+        // Restore energy slowly
+        gameState.energy = Math.min(100, gameState.energy + 1);
+        updateUI();
+      }, 2000);
+
+      showMessage('Game started! Plant seeds and grow your forest!', 'success');
+    }
+
+    function createRandomWeather() {
+      const weatherTypes = ['rain', 'sun'];
+      const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+
+      if (weather === 'rain') {
+        // Create rain effect
+        for (let i = 0; i < 10; i++) {
+          const drop = document.createElement('div');
+          drop.textContent = '💧';
+          drop.className = 'rain-drop';
+          drop.style.left = Math.random() * 100 + '%';
+          drop.style.animationDelay = (i * 0.1) + 's';
+
+          elements.weatherEffects.appendChild(drop);
+          setTimeout(() => drop.remove(), 2000);
+        }
+
+        // Benefit all plants
+        gameState.plants.forEach(plant => {
+          plant.waterLevel = Math.min(100, plant.waterLevel + 10);
+        });
+
+        showMessage('Rain! All plants got water! 🌧️', 'info');
       }
-      
-      // Gradually decrease plant levels
-      gameState.plants.forEach(plant => {
-        plant.waterLevel = Math.max(0, plant.waterLevel - 2);
-        plant.sunLevel = Math.max(0, plant.sunLevel - 1);
-        
-        if (plant.waterLevel < 20 || plant.sunLevel < 20) {
-          plant.health = Math.max(0, plant.health - 1);
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (autoWaterInterval) clearInterval(autoWaterInterval);
+      if (weatherInterval) clearInterval(weatherInterval);
+
+      // Clear plants
+      gameState.plants.forEach(plant => plant.element.remove());
+
+      // Reset state
+      gameState.score = 0;
+      gameState.treesPlanted = 0;
+      gameState.level = 1;
+      gameState.co2Saved = 0;
+      gameState.energy = 100;
+      gameState.isPlaying = false;
+      gameState.autoWaterEnabled = false;
+      gameState.plants = [];
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
         }
       });
-      
-      // Restore energy slowly
-      gameState.energy = Math.min(100, gameState.energy + 1);
+
+      selectedPlant = null;
+      elements.startBtn.disabled = false;
+      elements.autoWaterBtn.textContent = '🤖 Auto Water';
+      elements.autoWaterBtn.style.background = '';
+
       updateUI();
-    }, 2000);
-    
-    showMessage('Game started! Plant seeds and grow your forest!', 'success');
-  }
-
-  function createRandomWeather() {
-    const weatherTypes = ['rain', 'sun'];
-    const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-    
-    if (weather === 'rain') {
-      // Create rain effect
-      for (let i = 0; i < 10; i++) {
-        const drop = document.createElement('div');
-        drop.textContent = '💧';
-        drop.className = 'rain-drop';
-        drop.style.left = Math.random() * 100 + '%';
-        drop.style.animationDelay = (i * 0.1) + 's';
-        
-        elements.weatherEffects.appendChild(drop);
-        setTimeout(() => drop.remove(), 2000);
-      }
-      
-      // Benefit all plants
-      gameState.plants.forEach(plant => {
-        plant.waterLevel = Math.min(100, plant.waterLevel + 10);
-      });
-      
-      showMessage('Rain! All plants got water! 🌧️', 'info');
+      showMessage('Garden reset!', 'info');
     }
-  }
 
-  function resetGame() {
-    // Clear intervals
-    if (autoWaterInterval) clearInterval(autoWaterInterval);
-    if (weatherInterval) clearInterval(weatherInterval);
-    
-    // Clear plants
-    gameState.plants.forEach(plant => plant.element.remove());
-    
-    // Reset state
-    gameState.score = 0;
-    gameState.treesPlanted = 0;
-    gameState.level = 1;
-    gameState.co2Saved = 0;
-    gameState.energy = 100;
-    gameState.isPlaying = false;
-    gameState.autoWaterEnabled = false;
-    gameState.plants = [];
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
-      if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
+    // Event listeners
+    elements.plantSeedBtn.addEventListener('click', plantSeed);
+    elements.waterBtn.addEventListener('click', waterPlant);
+    elements.sunBtn.addEventListener('click', giveSunlight);
+    elements.fertilizerBtn.addEventListener('click', useFertilizer);
+    elements.startBtn.addEventListener('click', startGame);
+    elements.autoWaterBtn.addEventListener('click', toggleAutoWater);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Garden click to plant seeds
+    elements.plantsContainer.addEventListener('click', (e) => {
+      if (e.target === elements.plantsContainer && gameState.energy >= 15) {
+        const rect = elements.plantsContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left - 25; // Center the plant
+        const y = 0;
+
+        if (x >= 0 && x <= rect.width - 50) {
+          createPlant(x, y);
+          gameState.energy -= 15;
+          gameState.score += 5;
+          updateUI();
+          showMessage('Seed planted! 🌰', 'success');
+        }
       }
     });
-    
-    selectedPlant = null;
-    elements.startBtn.disabled = false;
-    elements.autoWaterBtn.textContent = '🤖 Auto Water';
-    elements.autoWaterBtn.style.background = '';
-    
-    updateUI();
-    showMessage('Garden reset!', 'info');
-  }
 
-  // Event listeners
-  elements.plantSeedBtn.addEventListener('click', plantSeed);
-  elements.waterBtn.addEventListener('click', waterPlant);
-  elements.sunBtn.addEventListener('click', giveSunlight);
-  elements.fertilizerBtn.addEventListener('click', useFertilizer);
-  elements.startBtn.addEventListener('click', startGame);
-  elements.autoWaterBtn.addEventListener('click', toggleAutoWater);
-  elements.resetBtn.addEventListener('click', resetGame);
-
-  // Garden click to plant seeds
-  elements.plantsContainer.addEventListener('click', (e) => {
-    if (e.target === elements.plantsContainer && gameState.energy >= 15) {
-      const rect = elements.plantsContainer.getBoundingClientRect();
-      const x = e.clientX - rect.left - 25; // Center the plant
-      const y = 0;
-      
-      if (x >= 0 && x <= rect.width - 50) {
-        createPlant(x, y);
-        gameState.energy -= 15;
-        gameState.score += 5;
-        updateUI();
-        showMessage('Seed planted! 🌰', 'success');
-      }
-    }
-  });
-
-  // Add CSS for sun ray effect
-  const style = document.createElement('style');
-  style.textContent = `
+    // Add CSS for sun ray effect
+    const style = document.createElement('style');
+    style.textContent = `
     @keyframes sunRayEffect {
       0% { opacity: 0; transform: translateY(20px) scale(0.5); }
       50% { opacity: 1; transform: translateY(-10px) scale(1.2); }
@@ -5572,2591 +5634,2591 @@ function initPlantTreeGame() {
       box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
     }
   `;
-  document.head.appendChild(style);
+    document.head.appendChild(style);
 
-  // Initialize UI
-  updateUI();
-  showMessage('Plant the Tree game loaded! Click Start Growing to begin!', 'info');
-}
-
-// Save the Ocean Game Implementation
-function initSaveOceanGame() {
-  const gameState = {
-    score: 0,
-    trashCollected: 0,
-    level: 1,
-    lives: 3,
-    timeLeft: 60,
-    isPlaying: false,
-    isPaused: false,
-    boatX: 0,
-    gameSpeed: 1,
-    spawnRate: 2000,
-    gameInterval: null,
-    spawnInterval: null,
-    timerInterval: null,
-    fallingItems: [],
-    achievements: {
-      'first-cleanup': false,
-      'ocean-guardian': false,
-      'marine-protector': false
-    }
-  };
-
-  const trashTypes = [
-    { emoji: '🧴', name: 'Plastic Bottle', points: 10, type: 'trash' },
-    { emoji: '🥤', name: 'Soda Cup', points: 8, type: 'trash' },
-    { emoji: '🛍️', name: 'Plastic Bag', points: 12, type: 'trash' },
-    { emoji: '🍟', name: 'Food Container', points: 6, type: 'trash' },
-    { emoji: '🥫', name: 'Metal Can', points: 15, type: 'trash' },
-    { emoji: '📦', name: 'Cardboard', points: 5, type: 'trash' }
-  ];
-
-  const seaLife = [
-    { emoji: '🐠', name: 'Fish', penalty: -10, type: 'animal' },
-    { emoji: '🐟', name: 'Fish', penalty: -10, type: 'animal' },
-    { emoji: '🦈', name: 'Shark', penalty: -20, type: 'animal' },
-    { emoji: '🐙', name: 'Octopus', penalty: -15, type: 'animal' },
-    { emoji: '🐢', name: 'Turtle', penalty: -25, type: 'animal' },
-    { emoji: '🦀', name: 'Crab', penalty: -8, type: 'animal' }
-  ];
-
-  const powerUps = [
-    { emoji: '⚡', name: 'Speed Boost', effect: 'speed', type: 'powerup' },
-    { emoji: '🛡️', name: 'Shield', effect: 'shield', type: 'powerup' },
-    { emoji: '💰', name: 'Double Points', effect: 'double', type: 'powerup' },
-    { emoji: '❤️', name: 'Extra Life', effect: 'life', type: 'powerup' }
-  ];
-
-  const elements = {
-    scoreEl: document.getElementById('ocean-score'),
-    trashEl: document.getElementById('trash-collected'),
-    levelEl: document.getElementById('ocean-level'),
-    livesEl: document.getElementById('ocean-lives'),
-    timerEl: document.getElementById('ocean-timer'),
-    boat: document.getElementById('boat'),
-    gameArea: document.getElementById('ocean-game-area'),
-    trashContainer: document.getElementById('trash-items'),
-    seaLifeContainer: document.getElementById('sea-life'),
-    powerUpContainer: document.getElementById('power-ups'),
-    startBtn: document.getElementById('start-ocean-game'),
-    pauseBtn: document.getElementById('pause-ocean-game'),
-    resetBtn: document.getElementById('reset-ocean-game'),
-    moveLeftBtn: document.getElementById('move-left'),
-    moveRightBtn: document.getElementById('move-right'),
-    achievementsContainer: document.getElementById('ocean-achievements')
-  };
-
-  let activeEffects = {
-    shield: false,
-    doublePoints: false,
-    speedBoost: false
-  };
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.trashEl.textContent = gameState.trashCollected;
-    elements.levelEl.textContent = gameState.level;
-    elements.timerEl.textContent = gameState.timeLeft;
-    
-    // Update lives display
-    const heartsArray = Array(gameState.lives).fill('❤️');
-    const emptyHearts = Array(Math.max(0, 3 - gameState.lives)).fill('🖤');
-    elements.livesEl.textContent = heartsArray.concat(emptyHearts).join('');
+    // Initialize UI
+    updateUI();
+    showMessage('Plant the Tree game loaded! Click Start Growing to begin!', 'info');
   }
 
-  function initializeBoat() {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    gameState.boatX = gameAreaRect.width / 2 - 25; // Center boat
-    elements.boat.style.left = gameState.boatX + 'px';
-  }
-
-  function moveBoat(direction) {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const boatWidth = 50;
-    const moveSpeed = activeEffects.speedBoost ? 40 : 25;
-    
-    if (direction === 'left') {
-      gameState.boatX = Math.max(0, gameState.boatX - moveSpeed);
-      elements.boat.classList.add('moving-left');
-      setTimeout(() => elements.boat.classList.remove('moving-left'), 300);
-    } else if (direction === 'right') {
-      gameState.boatX = Math.min(gameAreaRect.width - boatWidth, gameState.boatX + moveSpeed);
-      elements.boat.classList.add('moving-right');
-      setTimeout(() => elements.boat.classList.remove('moving-right'), 300);
-    }
-    
-    elements.boat.style.left = gameState.boatX + 'px';
-  }
-
-  function createFallingItem(itemData) {
-    const item = document.createElement('div');
-    item.className = itemData.type === 'trash' ? 'trash-item' : 
-                     itemData.type === 'animal' ? 'sea-animal' : 'power-up';
-    item.textContent = itemData.emoji;
-    item.dataset.type = itemData.type;
-    item.dataset.points = itemData.points || itemData.penalty || 0;
-    item.dataset.effect = itemData.effect || '';
-    
-    // Random horizontal position
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 50);
-    item.style.left = x + 'px';
-    item.style.top = '0px';
-    
-    // Add to appropriate container
-    if (itemData.type === 'trash') {
-      elements.trashContainer.appendChild(item);
-    } else if (itemData.type === 'animal') {
-      elements.seaLifeContainer.appendChild(item);
-    } else {
-      elements.powerUpContainer.appendChild(item);
-    }
-    
-    gameState.fallingItems.push({
-      element: item,
-      x: x,
-      y: 0,
-      speed: (2 + gameState.level * 0.5) * gameState.gameSpeed,
-      data: itemData
-    });
-    
-    return item;
-  }
-
-  function spawnRandomItem() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    const rand = Math.random();
-    let itemData;
-    
-    if (rand < 0.6) {
-      // 60% chance for trash
-      itemData = trashTypes[Math.floor(Math.random() * trashTypes.length)];
-    } else if (rand < 0.85) {
-      // 25% chance for sea life
-      itemData = seaLife[Math.floor(Math.random() * seaLife.length)];
-    } else {
-      // 15% chance for power-ups
-      itemData = powerUps[Math.floor(Math.random() * powerUps.length)];
-    }
-    
-    createFallingItem(itemData);
-  }
-
-  function updateFallingItems() {
-    gameState.fallingItems.forEach((item, index) => {
-      item.y += item.speed;
-      item.element.style.top = item.y + 'px';
-      
-      // Check collision with boat
-      const boatRect = elements.boat.getBoundingClientRect();
-      const itemRect = item.element.getBoundingClientRect();
-      
-      if (checkCollision(boatRect, itemRect)) {
-        handleItemCollection(item, index);
-        return;
+  // Save the Ocean Game Implementation
+  function initSaveOceanGame() {
+    const gameState = {
+      score: 0,
+      trashCollected: 0,
+      level: 1,
+      lives: 3,
+      timeLeft: 60,
+      isPlaying: false,
+      isPaused: false,
+      boatX: 0,
+      gameSpeed: 1,
+      spawnRate: 2000,
+      gameInterval: null,
+      spawnInterval: null,
+      timerInterval: null,
+      fallingItems: [],
+      achievements: {
+        'first-cleanup': false,
+        'ocean-guardian': false,
+        'marine-protector': false
       }
-      
-      // Remove items that fall off screen
-      if (item.y > elements.gameArea.offsetHeight) {
-        if (item.data.type === 'trash') {
-          // Penalty for missing trash
+    };
+
+    const trashTypes = [
+      { emoji: '🧴', name: 'Plastic Bottle', points: 10, type: 'trash' },
+      { emoji: '🥤', name: 'Soda Cup', points: 8, type: 'trash' },
+      { emoji: '🛍️', name: 'Plastic Bag', points: 12, type: 'trash' },
+      { emoji: '🍟', name: 'Food Container', points: 6, type: 'trash' },
+      { emoji: '🥫', name: 'Metal Can', points: 15, type: 'trash' },
+      { emoji: '📦', name: 'Cardboard', points: 5, type: 'trash' }
+    ];
+
+    const seaLife = [
+      { emoji: '🐠', name: 'Fish', penalty: -10, type: 'animal' },
+      { emoji: '🐟', name: 'Fish', penalty: -10, type: 'animal' },
+      { emoji: '🦈', name: 'Shark', penalty: -20, type: 'animal' },
+      { emoji: '🐙', name: 'Octopus', penalty: -15, type: 'animal' },
+      { emoji: '🐢', name: 'Turtle', penalty: -25, type: 'animal' },
+      { emoji: '🦀', name: 'Crab', penalty: -8, type: 'animal' }
+    ];
+
+    const powerUps = [
+      { emoji: '⚡', name: 'Speed Boost', effect: 'speed', type: 'powerup' },
+      { emoji: '🛡️', name: 'Shield', effect: 'shield', type: 'powerup' },
+      { emoji: '💰', name: 'Double Points', effect: 'double', type: 'powerup' },
+      { emoji: '❤️', name: 'Extra Life', effect: 'life', type: 'powerup' }
+    ];
+
+    const elements = {
+      scoreEl: document.getElementById('ocean-score'),
+      trashEl: document.getElementById('trash-collected'),
+      levelEl: document.getElementById('ocean-level'),
+      livesEl: document.getElementById('ocean-lives'),
+      timerEl: document.getElementById('ocean-timer'),
+      boat: document.getElementById('boat'),
+      gameArea: document.getElementById('ocean-game-area'),
+      trashContainer: document.getElementById('trash-items'),
+      seaLifeContainer: document.getElementById('sea-life'),
+      powerUpContainer: document.getElementById('power-ups'),
+      startBtn: document.getElementById('start-ocean-game'),
+      pauseBtn: document.getElementById('pause-ocean-game'),
+      resetBtn: document.getElementById('reset-ocean-game'),
+      moveLeftBtn: document.getElementById('move-left'),
+      moveRightBtn: document.getElementById('move-right'),
+      achievementsContainer: document.getElementById('ocean-achievements')
+    };
+
+    let activeEffects = {
+      shield: false,
+      doublePoints: false,
+      speedBoost: false
+    };
+
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.trashEl.textContent = gameState.trashCollected;
+      elements.levelEl.textContent = gameState.level;
+      elements.timerEl.textContent = gameState.timeLeft;
+
+      // Update lives display
+      const heartsArray = Array(gameState.lives).fill('❤️');
+      const emptyHearts = Array(Math.max(0, 3 - gameState.lives)).fill('🖤');
+      elements.livesEl.textContent = heartsArray.concat(emptyHearts).join('');
+    }
+
+    function initializeBoat() {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      gameState.boatX = gameAreaRect.width / 2 - 25; // Center boat
+      elements.boat.style.left = gameState.boatX + 'px';
+    }
+
+    function moveBoat(direction) {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const boatWidth = 50;
+      const moveSpeed = activeEffects.speedBoost ? 40 : 25;
+
+      if (direction === 'left') {
+        gameState.boatX = Math.max(0, gameState.boatX - moveSpeed);
+        elements.boat.classList.add('moving-left');
+        setTimeout(() => elements.boat.classList.remove('moving-left'), 300);
+      } else if (direction === 'right') {
+        gameState.boatX = Math.min(gameAreaRect.width - boatWidth, gameState.boatX + moveSpeed);
+        elements.boat.classList.add('moving-right');
+        setTimeout(() => elements.boat.classList.remove('moving-right'), 300);
+      }
+
+      elements.boat.style.left = gameState.boatX + 'px';
+    }
+
+    function createFallingItem(itemData) {
+      const item = document.createElement('div');
+      item.className = itemData.type === 'trash' ? 'trash-item' :
+        itemData.type === 'animal' ? 'sea-animal' : 'power-up';
+      item.textContent = itemData.emoji;
+      item.dataset.type = itemData.type;
+      item.dataset.points = itemData.points || itemData.penalty || 0;
+      item.dataset.effect = itemData.effect || '';
+
+      // Random horizontal position
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 50);
+      item.style.left = x + 'px';
+      item.style.top = '0px';
+
+      // Add to appropriate container
+      if (itemData.type === 'trash') {
+        elements.trashContainer.appendChild(item);
+      } else if (itemData.type === 'animal') {
+        elements.seaLifeContainer.appendChild(item);
+      } else {
+        elements.powerUpContainer.appendChild(item);
+      }
+
+      gameState.fallingItems.push({
+        element: item,
+        x: x,
+        y: 0,
+        speed: (2 + gameState.level * 0.5) * gameState.gameSpeed,
+        data: itemData
+      });
+
+      return item;
+    }
+
+    function spawnRandomItem() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      const rand = Math.random();
+      let itemData;
+
+      if (rand < 0.6) {
+        // 60% chance for trash
+        itemData = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+      } else if (rand < 0.85) {
+        // 25% chance for sea life
+        itemData = seaLife[Math.floor(Math.random() * seaLife.length)];
+      } else {
+        // 15% chance for power-ups
+        itemData = powerUps[Math.floor(Math.random() * powerUps.length)];
+      }
+
+      createFallingItem(itemData);
+    }
+
+    function updateFallingItems() {
+      gameState.fallingItems.forEach((item, index) => {
+        item.y += item.speed;
+        item.element.style.top = item.y + 'px';
+
+        // Check collision with boat
+        const boatRect = elements.boat.getBoundingClientRect();
+        const itemRect = item.element.getBoundingClientRect();
+
+        if (checkCollision(boatRect, itemRect)) {
+          handleItemCollection(item, index);
+          return;
+        }
+
+        // Remove items that fall off screen
+        if (item.y > elements.gameArea.offsetHeight) {
+          if (item.data.type === 'trash') {
+            // Penalty for missing trash
+            gameState.lives--;
+            elements.livesEl.classList.add('life-lost');
+            setTimeout(() => elements.livesEl.classList.remove('life-lost'), 500);
+
+            if (gameState.lives <= 0) {
+              endGame();
+              return;
+            }
+          }
+
+          removeItem(item, index);
+        }
+      });
+    }
+
+    function checkCollision(rect1, rect2) {
+      return !(rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom);
+    }
+
+    function handleItemCollection(item, index) {
+      const itemData = item.data;
+
+      if (itemData.type === 'trash') {
+        // Collect trash
+        const points = activeEffects.doublePoints ? itemData.points * 2 : itemData.points;
+        gameState.score += points;
+        gameState.trashCollected++;
+
+        createScorePopup(item.element, `+${points}`, '#FFD700');
+        createSplashEffect(item.element);
+
+        checkLevelUp();
+        checkAchievements();
+
+      } else if (itemData.type === 'animal') {
+        // Penalty for hitting sea life
+        if (!activeEffects.shield) {
+          gameState.score = Math.max(0, gameState.score + itemData.penalty);
           gameState.lives--;
+
+          createScorePopup(item.element, `${itemData.penalty}`, '#ff4444');
           elements.livesEl.classList.add('life-lost');
           setTimeout(() => elements.livesEl.classList.remove('life-lost'), 500);
-          
+
           if (gameState.lives <= 0) {
             endGame();
             return;
           }
+        } else {
+          createScorePopup(item.element, 'PROTECTED!', '#00BFFF');
         }
-        
+
+      } else if (itemData.type === 'powerup') {
+        // Apply power-up effect
+        applyPowerUp(itemData.effect);
+        createScorePopup(item.element, itemData.name, '#FFD700');
+      }
+
+      // Add collection effect
+      item.element.classList.add('collected-effect');
+
+      setTimeout(() => {
         removeItem(item, index);
+      }, 500);
+
+      updateUI();
+    }
+
+    function applyPowerUp(effect) {
+      switch (effect) {
+        case 'speed':
+          activeEffects.speedBoost = true;
+          setTimeout(() => { activeEffects.speedBoost = false; }, 5000);
+          showMessage('Speed Boost activated! ⚡', 'info');
+          break;
+
+        case 'shield':
+          activeEffects.shield = true;
+          setTimeout(() => { activeEffects.shield = false; }, 8000);
+          showMessage('Shield activated! 🛡️', 'info');
+          break;
+
+        case 'double':
+          activeEffects.doublePoints = true;
+          setTimeout(() => { activeEffects.doublePoints = false; }, 10000);
+          showMessage('Double Points activated! 💰', 'info');
+          break;
+
+        case 'life':
+          gameState.lives = Math.min(3, gameState.lives + 1);
+          showMessage('Extra Life! ❤️', 'success');
+          break;
+      }
+    }
+
+    function createScorePopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'score-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.style.left;
+      popup.style.top = element.style.top;
+
+      elements.gameArea.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    function createSplashEffect(element) {
+      const splash = document.createElement('div');
+      splash.className = 'splash-effect';
+      splash.textContent = '💦';
+      splash.style.left = element.style.left;
+      splash.style.top = element.style.top;
+
+      elements.gameArea.appendChild(splash);
+
+      setTimeout(() => splash.remove(), 800);
+    }
+
+    function removeItem(item, index) {
+      if (item.element && item.element.parentNode) {
+        item.element.remove();
+      }
+      gameState.fallingItems.splice(index, 1);
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.trashCollected / 20) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+        gameState.gameSpeed += 0.2;
+        gameState.spawnRate = Math.max(1000, gameState.spawnRate - 200);
+
+        // Restart spawn interval with new rate
+        if (gameState.spawnInterval) {
+          clearInterval(gameState.spawnInterval);
+          gameState.spawnInterval = setInterval(spawnRandomItem, gameState.spawnRate);
+        }
+
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+        addConfetti();
+      }
+    }
+
+    function checkAchievements() {
+      // First Cleanup
+      if (gameState.trashCollected >= 10 && !gameState.achievements['first-cleanup']) {
+        unlockAchievement('first-cleanup', 'First Cleanup! 🧹');
+      }
+
+      // Ocean Guardian
+      if (gameState.trashCollected >= 50 && !gameState.achievements['ocean-guardian']) {
+        unlockAchievement('ocean-guardian', 'Ocean Guardian! 🌊');
+      }
+
+      // Marine Protector
+      if (gameState.score >= 500 && !gameState.achievements['marine-protector']) {
+        unlockAchievement('marine-protector', 'Marine Protector! 🐋');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
+      if (achievementEl) {
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
+      }
+
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 100; // Bonus points for achievements
+      updateUI();
+    }
+
+    function startGame() {
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+
+      initializeBoat();
+
+      // Start game timer
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          }
+        }
+      }, 1000);
+
+      // Start spawning items
+      gameState.spawnInterval = setInterval(spawnRandomItem, gameState.spawnRate);
+
+      // Start game loop
+      gameState.gameInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          updateFallingItems();
+        }
+      }, 50);
+
+      showMessage('Ocean cleanup started! Collect trash and avoid sea life!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+      // Clear falling items
+      gameState.fallingItems.forEach(item => {
+        if (item.element && item.element.parentNode) {
+          item.element.remove();
+        }
+      });
+      gameState.fallingItems = [];
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.trashCollected = 0;
+      gameState.level = 1;
+      gameState.lives = 3;
+      gameState.timeLeft = 60;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+      gameState.gameSpeed = 1;
+      gameState.spawnRate = 2000;
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
+        }
+      });
+
+      // Reset active effects
+      activeEffects = { shield: false, doublePoints: false, speedBoost: false };
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      initializeBoat();
+      updateUI();
+      showMessage('Ocean game reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`Ocean Cleanup (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Trash Collected: ${gameState.trashCollected} | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 200) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Mobile controls
+    elements.moveLeftBtn.addEventListener('click', () => moveBoat('left'));
+    elements.moveRightBtn.addEventListener('click', () => moveBoat('right'));
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        moveBoat('left');
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        moveBoat('right');
+        e.preventDefault();
       }
     });
+
+    // Initialize UI
+    initializeBoat();
+    updateUI();
+    showMessage('Save the Ocean game loaded! Click Start Cleaning to begin!', 'info');
   }
 
-  function checkCollision(rect1, rect2) {
-    return !(rect1.right < rect2.left || 
-             rect1.left > rect2.right || 
-             rect1.bottom < rect2.top || 
-             rect1.top > rect2.bottom);
-  }
+  // Clean the City Game Implementation
+  function initCleanCityGame() {
+    const gameState = {
+      score: 0,
+      trashCleaned: 0,
+      level: 1,
+      timeLeft: 60,
+      combo: 0,
+      maxCombo: 0,
+      isPlaying: false,
+      isPaused: false,
+      playerX: 0,
+      playerY: 0,
+      gameInterval: null,
+      spawnInterval: null,
+      timerInterval: null,
+      comboTimer: null,
+      trashItems: [],
+      obstacles: [],
+      npcs: [],
+      achievements: {
+        'street-sweeper': false,
+        'city-hero': false,
+        'clean-machine': false
+      }
+    };
 
-  function handleItemCollection(item, index) {
-    const itemData = item.data;
-    
-    if (itemData.type === 'trash') {
-      // Collect trash
-      const points = activeEffects.doublePoints ? itemData.points * 2 : itemData.points;
-      gameState.score += points;
-      gameState.trashCollected++;
-      
-      createScorePopup(item.element, `+${points}`, '#FFD700');
-      createSplashEffect(item.element);
-      
+    const trashTypes = [
+      { emoji: '🍌', name: 'Banana Peel', points: 5, type: 'organic' },
+      { emoji: '🧴', name: 'Plastic Bottle', points: 8, type: 'plastic' },
+      { emoji: '🍟', name: 'Food Container', points: 6, type: 'food' },
+      { emoji: '🛍️', name: 'Plastic Bag', points: 10, type: 'plastic' },
+      { emoji: '🥤', name: 'Soda Cup', points: 7, type: 'plastic' },
+      { emoji: '🍕', name: 'Pizza Box', points: 4, type: 'cardboard' },
+      { emoji: '🚬', name: 'Cigarette', points: 12, type: 'toxic' },
+      { emoji: '📰', name: 'Newspaper', points: 3, type: 'paper' }
+    ];
+
+    const obstacleTypes = [
+      { emoji: '🚗', name: 'Car', type: 'vehicle' },
+      { emoji: '🚙', name: 'SUV', type: 'vehicle' },
+      { emoji: '🌳', name: 'Tree', type: 'nature' },
+      { emoji: '🚧', name: 'Construction', type: 'barrier' }
+    ];
+
+    const npcTypes = [
+      { emoji: '🚶‍♂️', name: 'Man Walking', type: 'pedestrian' },
+      { emoji: '🚶‍♀️', name: 'Woman Walking', type: 'pedestrian' },
+      { emoji: '🏃‍♂️', name: 'Man Running', type: 'runner' },
+      { emoji: '👮‍♂️', name: 'Police Officer', type: 'authority' }
+    ];
+
+    const elements = {
+      scoreEl: document.getElementById('city-score'),
+      trashEl: document.getElementById('trash-cleaned'),
+      levelEl: document.getElementById('city-level'),
+      timerEl: document.getElementById('city-timer'),
+      comboEl: document.getElementById('city-combo'),
+      player: document.getElementById('city-player'),
+      gameArea: document.getElementById('city-game-area'),
+      trashContainer: document.getElementById('city-trash-items'),
+      obstacleContainer: document.getElementById('city-obstacles'),
+      npcContainer: document.getElementById('city-npcs'),
+      startBtn: document.getElementById('start-city-game'),
+      pauseBtn: document.getElementById('pause-city-game'),
+      resetBtn: document.getElementById('reset-city-game'),
+      moveUpBtn: document.getElementById('city-move-up'),
+      moveDownBtn: document.getElementById('city-move-down'),
+      moveLeftBtn: document.getElementById('city-move-left'),
+      moveRightBtn: document.getElementById('city-move-right'),
+      achievementsContainer: document.getElementById('city-achievements')
+    };
+
+    let keys = {};
+    let lastComboTime = 0;
+
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.trashEl.textContent = gameState.trashCleaned;
+      elements.levelEl.textContent = gameState.level;
+      elements.timerEl.textContent = gameState.timeLeft;
+      elements.comboEl.textContent = gameState.combo;
+
+      // Add combo glow effect
+      if (gameState.combo > 0) {
+        elements.comboEl.parentElement.classList.add('combo-active');
+      } else {
+        elements.comboEl.parentElement.classList.remove('combo-active');
+      }
+    }
+
+    function initializePlayer() {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      gameState.playerX = gameAreaRect.width / 2 - 25;
+      gameState.playerY = gameAreaRect.height - 60;
+      elements.player.style.left = gameState.playerX + 'px';
+      elements.player.style.top = gameState.playerY + 'px';
+    }
+
+    function movePlayer(direction) {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const playerSize = 50;
+      const moveSpeed = 20;
+
+      let newX = gameState.playerX;
+      let newY = gameState.playerY;
+
+      switch (direction) {
+        case 'up':
+          newY = Math.max(0, gameState.playerY - moveSpeed);
+          elements.player.classList.add('moving-up');
+          setTimeout(() => elements.player.classList.remove('moving-up'), 300);
+          break;
+        case 'down':
+          newY = Math.min(gameAreaRect.height - playerSize, gameState.playerY + moveSpeed);
+          elements.player.classList.add('moving-down');
+          setTimeout(() => elements.player.classList.remove('moving-down'), 300);
+          break;
+        case 'left':
+          newX = Math.max(0, gameState.playerX - moveSpeed);
+          elements.player.classList.add('moving-left');
+          setTimeout(() => elements.player.classList.remove('moving-left'), 300);
+          break;
+        case 'right':
+          newX = Math.min(gameAreaRect.width - playerSize, gameState.playerX + moveSpeed);
+          elements.player.classList.add('moving-right');
+          setTimeout(() => elements.player.classList.remove('moving-right'), 300);
+          break;
+      }
+
+      gameState.playerX = newX;
+      gameState.playerY = newY;
+      elements.player.style.left = gameState.playerX + 'px';
+      elements.player.style.top = gameState.playerY + 'px';
+
+      checkCollisions();
+    }
+
+    function createTrashItem() {
+      const trashData = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+      const item = document.createElement('div');
+      item.className = 'city-trash-item';
+      item.textContent = trashData.emoji;
+      item.dataset.points = trashData.points;
+      item.dataset.type = trashData.type;
+      item.dataset.name = trashData.name;
+
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 50);
+      const y = Math.random() * (gameAreaRect.height - 100) + 50; // Avoid bottom area
+
+      item.style.left = x + 'px';
+      item.style.top = y + 'px';
+
+      elements.trashContainer.appendChild(item);
+
+      gameState.trashItems.push({
+        element: item,
+        x: x,
+        y: y,
+        data: trashData
+      });
+
+      return item;
+    }
+
+    function createObstacle() {
+      const obstacleData = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+      const item = document.createElement('div');
+      item.className = 'city-obstacle';
+      item.textContent = obstacleData.emoji;
+      item.dataset.type = obstacleData.type;
+      item.dataset.name = obstacleData.name;
+
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 50);
+      const y = Math.random() * (gameAreaRect.height - 150) + 100;
+
+      item.style.left = x + 'px';
+      item.style.top = y + 'px';
+
+      elements.obstacleContainer.appendChild(item);
+
+      gameState.obstacles.push({
+        element: item,
+        x: x,
+        y: y,
+        data: obstacleData
+      });
+
+      return item;
+    }
+
+    function createNPC() {
+      const npcData = npcTypes[Math.floor(Math.random() * npcTypes.length)];
+      const item = document.createElement('div');
+      item.className = 'city-npc';
+      item.textContent = npcData.emoji;
+      item.dataset.type = npcData.type;
+      item.dataset.name = npcData.name;
+
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 50);
+      const y = Math.random() * (gameAreaRect.height - 150) + 100;
+
+      item.style.left = x + 'px';
+      item.style.top = y + 'px';
+
+      elements.npcContainer.appendChild(item);
+
+      gameState.npcs.push({
+        element: item,
+        x: x,
+        y: y,
+        data: npcData
+      });
+
+      return item;
+    }
+
+    function checkCollisions() {
+      const playerRect = elements.player.getBoundingClientRect();
+
+      // Check trash collection
+      gameState.trashItems.forEach((item, index) => {
+        const itemRect = item.element.getBoundingClientRect();
+        if (checkCollision(playerRect, itemRect)) {
+          collectTrash(item, index);
+        }
+      });
+    }
+
+    function checkCollision(rect1, rect2) {
+      return !(rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom);
+    }
+
+    function collectTrash(item, index) {
+      const points = parseInt(item.data.points);
+      const comboMultiplier = Math.min(gameState.combo + 1, 5);
+      const totalPoints = points * comboMultiplier;
+
+      gameState.score += totalPoints;
+      gameState.trashCleaned++;
+      gameState.combo++;
+      gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
+
+      // Reset combo timer
+      if (gameState.comboTimer) {
+        clearTimeout(gameState.comboTimer);
+      }
+
+      gameState.comboTimer = setTimeout(() => {
+        gameState.combo = 0;
+        updateUI();
+      }, 3000);
+
+      // Create visual effects
+      createScorePopup(item.element, `+${totalPoints}`, '#FFD700');
+      if (gameState.combo > 1) {
+        createComboPopup(item.element, `${gameState.combo}x COMBO!`, '#FF6B6B');
+      }
+
+      // Add collection effect
+      item.element.classList.add('city-collected-effect');
+
+      setTimeout(() => {
+        if (item.element && item.element.parentNode) {
+          item.element.remove();
+        }
+        gameState.trashItems.splice(index, 1);
+      }, 600);
+
       checkLevelUp();
       checkAchievements();
-      
-    } else if (itemData.type === 'animal') {
-      // Penalty for hitting sea life
-      if (!activeEffects.shield) {
-        gameState.score = Math.max(0, gameState.score + itemData.penalty);
-        gameState.lives--;
-        
-        createScorePopup(item.element, `${itemData.penalty}`, '#ff4444');
-        elements.livesEl.classList.add('life-lost');
-        setTimeout(() => elements.livesEl.classList.remove('life-lost'), 500);
-        
-        if (gameState.lives <= 0) {
-          endGame();
+      updateUI();
+    }
+
+    function createScorePopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'city-score-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.style.left;
+      popup.style.top = element.style.top;
+
+      elements.gameArea.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    function createComboPopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'city-combo-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.style.left;
+      popup.style.top = (parseInt(element.style.top) - 30) + 'px';
+
+      elements.gameArea.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1200);
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.trashCleaned / 15) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+
+        // Show level up effect
+        const levelUpEffect = document.createElement('div');
+        levelUpEffect.className = 'level-up-effect';
+        levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
+        elements.gameArea.appendChild(levelUpEffect);
+
+        setTimeout(() => levelUpEffect.remove(), 2000);
+
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+        addConfetti();
+      }
+    }
+
+    function checkAchievements() {
+      // Street Sweeper
+      if (gameState.trashCleaned >= 20 && !gameState.achievements['street-sweeper']) {
+        unlockAchievement('street-sweeper', 'Street Sweeper! 🧹');
+      }
+
+      // City Hero
+      if (gameState.score >= 300 && !gameState.achievements['city-hero']) {
+        unlockAchievement('city-hero', 'City Hero! 🦸');
+      }
+
+      // Clean Machine
+      if (gameState.maxCombo >= 10 && !gameState.achievements['clean-machine']) {
+        unlockAchievement('clean-machine', 'Clean Machine! ⚡');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
+      if (achievementEl) {
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
+      }
+
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 50; // Bonus points for achievements
+      updateUI();
+    }
+
+    function spawnItems() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      // Spawn trash (main objective)
+      if (Math.random() < 0.8) {
+        createTrashItem();
+      }
+
+      // Spawn obstacles occasionally
+      if (Math.random() < 0.2 && gameState.obstacles.length < 3) {
+        createObstacle();
+      }
+
+      // Spawn NPCs occasionally
+      if (Math.random() < 0.3 && gameState.npcs.length < 2) {
+        createNPC();
+      }
+    }
+
+    function startGame() {
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+
+      initializePlayer();
+
+      // Start game timer
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          }
+        }
+      }, 1000);
+
+      // Start spawning items
+      gameState.spawnInterval = setInterval(spawnItems, 2000);
+
+      // Initial spawn
+      for (let i = 0; i < 5; i++) {
+        createTrashItem();
+      }
+
+      showMessage('City cleanup started! Collect trash to clean the city!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.comboTimer) clearTimeout(gameState.comboTimer);
+
+      // Clear items
+      gameState.trashItems.forEach(item => {
+        if (item.element && item.element.parentNode) {
+          item.element.remove();
+        }
+      });
+      gameState.obstacles.forEach(item => {
+        if (item.element && item.element.parentNode) {
+          item.element.remove();
+        }
+      });
+      gameState.npcs.forEach(item => {
+        if (item.element && item.element.parentNode) {
+          item.element.remove();
+        }
+      });
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.trashCleaned = 0;
+      gameState.level = 1;
+      gameState.timeLeft = 60;
+      gameState.combo = 0;
+      gameState.maxCombo = 0;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+      gameState.trashItems = [];
+      gameState.obstacles = [];
+      gameState.npcs = [];
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
+        }
+      });
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      initializePlayer();
+      updateUI();
+      showMessage('City game reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.comboTimer) clearTimeout(gameState.comboTimer);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`City Cleanup (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Trash Cleaned: ${gameState.trashCleaned} | Max Combo: ${gameState.maxCombo}x | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 200) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Mobile controls
+    elements.moveUpBtn.addEventListener('click', () => movePlayer('up'));
+    elements.moveDownBtn.addEventListener('click', () => movePlayer('down'));
+    elements.moveLeftBtn.addEventListener('click', () => movePlayer('left'));
+    elements.moveRightBtn.addEventListener('click', () => movePlayer('right'));
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      keys[e.key] = true;
+
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        movePlayer('up');
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        movePlayer('down');
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        movePlayer('left');
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        movePlayer('right');
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    // Initialize UI
+    initializePlayer();
+    updateUI();
+    showMessage('Clean the City game loaded! Click Start Cleaning to begin!', 'info');
+  }
+
+  // Rainwater Collector Game Implementation
+  function initRainwaterCollectorGame() {
+    const gameState = {
+      score: 0,
+      waterCollected: 0,
+      level: 1,
+      timeLeft: 60,
+      streak: 0,
+      maxStreak: 0,
+      isPlaying: false,
+      isPaused: false,
+      bucketX: 0,
+      gameSpeed: 1,
+      dropSpawnRate: 1500,
+      gameInterval: null,
+      spawnInterval: null,
+      timerInterval: null,
+      streakTimer: null,
+      lightningTimer: null,
+      fallingDrops: [],
+      achievements: {
+        'water-saver': false,
+        'rain-master': false,
+        'conservation-hero': false
+      }
+    };
+
+    const dropTypes = [
+      { emoji: '💧', name: 'Regular Drop', points: 5, water: 1, type: 'regular', probability: 0.7 },
+      { emoji: '💎', name: 'Pure Drop', points: 15, water: 3, type: 'special', probability: 0.15 },
+      { emoji: '🌟', name: 'Golden Drop', points: 25, water: 5, type: 'special', probability: 0.05 },
+      { emoji: '☠️', name: 'Contaminated', points: -10, water: -2, type: 'contaminated', probability: 0.1 }
+    ];
+
+    const obstacleTypes = [
+      { emoji: '🍃', name: 'Leaf', type: 'debris' },
+      { emoji: '🪨', name: 'Stone', type: 'debris' },
+      { emoji: '🗑️', name: 'Trash', type: 'pollution' }
+    ];
+
+    const elements = {
+      scoreEl: document.getElementById('rainwater-score'),
+      waterEl: document.getElementById('water-collected'),
+      levelEl: document.getElementById('rainwater-level'),
+      timerEl: document.getElementById('rainwater-timer'),
+      streakEl: document.getElementById('rainwater-streak'),
+      bucket: document.getElementById('rainwater-bucket'),
+      gameArea: document.getElementById('rainwater-game-area'),
+      raindropsContainer: document.getElementById('raindrops-container'),
+      specialDrops: document.getElementById('special-drops'),
+      obstaclesContainer: document.getElementById('rain-obstacles'),
+      lightningEffects: document.getElementById('lightning-effects'),
+      startBtn: document.getElementById('start-rainwater-game'),
+      pauseBtn: document.getElementById('pause-rainwater-game'),
+      resetBtn: document.getElementById('reset-rainwater-game'),
+      moveLeftBtn: document.getElementById('rainwater-move-left'),
+      moveRightBtn: document.getElementById('rainwater-move-right'),
+      achievementsContainer: document.getElementById('rainwater-achievements')
+    };
+
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.waterEl.textContent = gameState.waterCollected;
+      elements.levelEl.textContent = gameState.level;
+      elements.timerEl.textContent = gameState.timeLeft;
+      elements.streakEl.textContent = gameState.streak;
+
+      // Add streak glow effect
+      if (gameState.streak > 0) {
+        elements.streakEl.parentElement.classList.add('streak-active');
+      } else {
+        elements.streakEl.parentElement.classList.remove('streak-active');
+      }
+    }
+
+    function initializeBucket() {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      gameState.bucketX = gameAreaRect.width / 2 - 25;
+      elements.bucket.style.left = gameState.bucketX + 'px';
+    }
+
+    function moveBucket(direction) {
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const bucketWidth = 50;
+      const moveSpeed = 25;
+
+      if (direction === 'left') {
+        gameState.bucketX = Math.max(0, gameState.bucketX - moveSpeed);
+      } else if (direction === 'right') {
+        gameState.bucketX = Math.min(gameAreaRect.width - bucketWidth, gameState.bucketX + moveSpeed);
+      }
+
+      elements.bucket.style.left = gameState.bucketX + 'px';
+    }
+
+    function createDrop() {
+      // Determine drop type based on probability
+      const rand = Math.random();
+      let cumulativeProbability = 0;
+      let selectedDrop = dropTypes[0];
+
+      for (const dropType of dropTypes) {
+        cumulativeProbability += dropType.probability;
+        if (rand <= cumulativeProbability) {
+          selectedDrop = dropType;
+          break;
+        }
+      }
+
+      const drop = document.createElement('div');
+      drop.className = `raindrop ${selectedDrop.type}`;
+      drop.textContent = selectedDrop.emoji;
+      drop.dataset.points = selectedDrop.points;
+      drop.dataset.water = selectedDrop.water;
+      drop.dataset.type = selectedDrop.type;
+      drop.dataset.name = selectedDrop.name;
+
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 30);
+      drop.style.left = x + 'px';
+      drop.style.top = '0px';
+
+      if (selectedDrop.type === 'special') {
+        elements.specialDrops.appendChild(drop);
+      } else {
+        elements.raindropsContainer.appendChild(drop);
+      }
+
+      gameState.fallingDrops.push({
+        element: drop,
+        x: x,
+        y: 0,
+        speed: (2 + gameState.level * 0.3) * gameState.gameSpeed,
+        data: selectedDrop
+      });
+
+      return drop;
+    }
+
+    function createObstacle() {
+      const obstacleData = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+      const obstacle = document.createElement('div');
+      obstacle.className = 'obstacle';
+      obstacle.textContent = obstacleData.emoji;
+      obstacle.dataset.type = obstacleData.type;
+      obstacle.dataset.name = obstacleData.name;
+
+      const gameAreaRect = elements.gameArea.getBoundingClientRect();
+      const x = Math.random() * (gameAreaRect.width - 30);
+      obstacle.style.left = x + 'px';
+      obstacle.style.top = '0px';
+
+      elements.obstaclesContainer.appendChild(obstacle);
+
+      gameState.fallingDrops.push({
+        element: obstacle,
+        x: x,
+        y: 0,
+        speed: 1.5 * gameState.gameSpeed,
+        data: { ...obstacleData, points: -5, water: 0, type: 'obstacle' }
+      });
+
+      return obstacle;
+    }
+
+    function updateFallingDrops() {
+      gameState.fallingDrops.forEach((drop, index) => {
+        drop.y += drop.speed;
+        drop.element.style.top = drop.y + 'px';
+
+        // Check collision with bucket
+        const bucketRect = elements.bucket.getBoundingClientRect();
+        const dropRect = drop.element.getBoundingClientRect();
+
+        if (checkCollision(bucketRect, dropRect)) {
+          handleDropCollection(drop, index);
           return;
         }
-      } else {
-        createScorePopup(item.element, 'PROTECTED!', '#00BFFF');
-      }
-      
-    } else if (itemData.type === 'powerup') {
-      // Apply power-up effect
-      applyPowerUp(itemData.effect);
-      createScorePopup(item.element, itemData.name, '#FFD700');
-    }
-    
-    // Add collection effect
-    item.element.classList.add('collected-effect');
-    
-    setTimeout(() => {
-      removeItem(item, index);
-    }, 500);
-    
-    updateUI();
-  }
 
-  function applyPowerUp(effect) {
-    switch (effect) {
-      case 'speed':
-        activeEffects.speedBoost = true;
-        setTimeout(() => { activeEffects.speedBoost = false; }, 5000);
-        showMessage('Speed Boost activated! ⚡', 'info');
-        break;
-        
-      case 'shield':
-        activeEffects.shield = true;
-        setTimeout(() => { activeEffects.shield = false; }, 8000);
-        showMessage('Shield activated! 🛡️', 'info');
-        break;
-        
-      case 'double':
-        activeEffects.doublePoints = true;
-        setTimeout(() => { activeEffects.doublePoints = false; }, 10000);
-        showMessage('Double Points activated! 💰', 'info');
-        break;
-        
-      case 'life':
-        gameState.lives = Math.min(3, gameState.lives + 1);
-        showMessage('Extra Life! ❤️', 'success');
-        break;
-    }
-  }
-
-  function createScorePopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'score-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.style.left;
-    popup.style.top = element.style.top;
-    
-    elements.gameArea.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1000);
-  }
-
-  function createSplashEffect(element) {
-    const splash = document.createElement('div');
-    splash.className = 'splash-effect';
-    splash.textContent = '💦';
-    splash.style.left = element.style.left;
-    splash.style.top = element.style.top;
-    
-    elements.gameArea.appendChild(splash);
-    
-    setTimeout(() => splash.remove(), 800);
-  }
-
-  function removeItem(item, index) {
-    if (item.element && item.element.parentNode) {
-      item.element.remove();
-    }
-    gameState.fallingItems.splice(index, 1);
-  }
-
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.trashCollected / 20) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      gameState.gameSpeed += 0.2;
-      gameState.spawnRate = Math.max(1000, gameState.spawnRate - 200);
-      
-      // Restart spawn interval with new rate
-      if (gameState.spawnInterval) {
-        clearInterval(gameState.spawnInterval);
-        gameState.spawnInterval = setInterval(spawnRandomItem, gameState.spawnRate);
-      }
-      
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
-      addConfetti();
-    }
-  }
-
-  function checkAchievements() {
-    // First Cleanup
-    if (gameState.trashCollected >= 10 && !gameState.achievements['first-cleanup']) {
-      unlockAchievement('first-cleanup', 'First Cleanup! 🧹');
-    }
-    
-    // Ocean Guardian
-    if (gameState.trashCollected >= 50 && !gameState.achievements['ocean-guardian']) {
-      unlockAchievement('ocean-guardian', 'Ocean Guardian! 🌊');
-    }
-    
-    // Marine Protector
-    if (gameState.score >= 500 && !gameState.achievements['marine-protector']) {
-      unlockAchievement('marine-protector', 'Marine Protector! 🐋');
-    }
-  }
-
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 100; // Bonus points for achievements
-    updateUI();
-  }
-
-  function startGame() {
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    initializeBoat();
-    
-    // Start game timer
-    gameState.timerInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
+        // Remove drops that fall off screen
+        if (drop.y > elements.gameArea.offsetHeight) {
+          if (drop.data.type === 'regular' || drop.data.type === 'special') {
+            // Reset streak for missed water drops
+            gameState.streak = 0;
+            updateUI();
+          }
+          removeDrop(drop, index);
         }
-      }
-    }, 1000);
-    
-    // Start spawning items
-    gameState.spawnInterval = setInterval(spawnRandomItem, gameState.spawnRate);
-    
-    // Start game loop
-    gameState.gameInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        updateFallingItems();
-      }
-    }, 50);
-    
-    showMessage('Ocean cleanup started! Collect trash and avoid sea life!', 'info');
-  }
-
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
-    }
-  }
-
-  function resetGame() {
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    
-    // Clear falling items
-    gameState.fallingItems.forEach(item => {
-      if (item.element && item.element.parentNode) {
-        item.element.remove();
-      }
-    });
-    gameState.fallingItems = [];
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.trashCollected = 0;
-    gameState.level = 1;
-    gameState.lives = 3;
-    gameState.timeLeft = 60;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    gameState.gameSpeed = 1;
-    gameState.spawnRate = 2000;
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
-      if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
-      }
-    });
-    
-    // Reset active effects
-    activeEffects = { shield: false, doublePoints: false, speedBoost: false };
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
-    initializeBoat();
-    updateUI();
-    showMessage('Ocean game reset!', 'info');
-  }
-
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`Ocean Cleanup (Score: ${finalScore})`, pointsEarned);
-    }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Trash Collected: ${gameState.trashCollected} | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 200) {
-      addConfetti();
-    }
-  }
-
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
-
-  // Mobile controls
-  elements.moveLeftBtn.addEventListener('click', () => moveBoat('left'));
-  elements.moveRightBtn.addEventListener('click', () => moveBoat('right'));
-
-  // Keyboard controls
-  document.addEventListener('keydown', (e) => {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-      moveBoat('left');
-      e.preventDefault();
-    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-      moveBoat('right');
-      e.preventDefault();
-    }
-  });
-
-  // Initialize UI
-  initializeBoat();
-  updateUI();
-  showMessage('Save the Ocean game loaded! Click Start Cleaning to begin!', 'info');
-}
-
-// Clean the City Game Implementation
-function initCleanCityGame() {
-  const gameState = {
-    score: 0,
-    trashCleaned: 0,
-    level: 1,
-    timeLeft: 60,
-    combo: 0,
-    maxCombo: 0,
-    isPlaying: false,
-    isPaused: false,
-    playerX: 0,
-    playerY: 0,
-    gameInterval: null,
-    spawnInterval: null,
-    timerInterval: null,
-    comboTimer: null,
-    trashItems: [],
-    obstacles: [],
-    npcs: [],
-    achievements: {
-      'street-sweeper': false,
-      'city-hero': false,
-      'clean-machine': false
-    }
-  };
-
-  const trashTypes = [
-    { emoji: '🍌', name: 'Banana Peel', points: 5, type: 'organic' },
-    { emoji: '🧴', name: 'Plastic Bottle', points: 8, type: 'plastic' },
-    { emoji: '🍟', name: 'Food Container', points: 6, type: 'food' },
-    { emoji: '🛍️', name: 'Plastic Bag', points: 10, type: 'plastic' },
-    { emoji: '🥤', name: 'Soda Cup', points: 7, type: 'plastic' },
-    { emoji: '🍕', name: 'Pizza Box', points: 4, type: 'cardboard' },
-    { emoji: '🚬', name: 'Cigarette', points: 12, type: 'toxic' },
-    { emoji: '📰', name: 'Newspaper', points: 3, type: 'paper' }
-  ];
-
-  const obstacleTypes = [
-    { emoji: '🚗', name: 'Car', type: 'vehicle' },
-    { emoji: '🚙', name: 'SUV', type: 'vehicle' },
-    { emoji: '🌳', name: 'Tree', type: 'nature' },
-    { emoji: '🚧', name: 'Construction', type: 'barrier' }
-  ];
-
-  const npcTypes = [
-    { emoji: '🚶‍♂️', name: 'Man Walking', type: 'pedestrian' },
-    { emoji: '🚶‍♀️', name: 'Woman Walking', type: 'pedestrian' },
-    { emoji: '🏃‍♂️', name: 'Man Running', type: 'runner' },
-    { emoji: '👮‍♂️', name: 'Police Officer', type: 'authority' }
-  ];
-
-  const elements = {
-    scoreEl: document.getElementById('city-score'),
-    trashEl: document.getElementById('trash-cleaned'),
-    levelEl: document.getElementById('city-level'),
-    timerEl: document.getElementById('city-timer'),
-    comboEl: document.getElementById('city-combo'),
-    player: document.getElementById('city-player'),
-    gameArea: document.getElementById('city-game-area'),
-    trashContainer: document.getElementById('city-trash-items'),
-    obstacleContainer: document.getElementById('city-obstacles'),
-    npcContainer: document.getElementById('city-npcs'),
-    startBtn: document.getElementById('start-city-game'),
-    pauseBtn: document.getElementById('pause-city-game'),
-    resetBtn: document.getElementById('reset-city-game'),
-    moveUpBtn: document.getElementById('city-move-up'),
-    moveDownBtn: document.getElementById('city-move-down'),
-    moveLeftBtn: document.getElementById('city-move-left'),
-    moveRightBtn: document.getElementById('city-move-right'),
-    achievementsContainer: document.getElementById('city-achievements')
-  };
-
-  let keys = {};
-  let lastComboTime = 0;
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.trashEl.textContent = gameState.trashCleaned;
-    elements.levelEl.textContent = gameState.level;
-    elements.timerEl.textContent = gameState.timeLeft;
-    elements.comboEl.textContent = gameState.combo;
-    
-    // Add combo glow effect
-    if (gameState.combo > 0) {
-      elements.comboEl.parentElement.classList.add('combo-active');
-    } else {
-      elements.comboEl.parentElement.classList.remove('combo-active');
-    }
-  }
-
-  function initializePlayer() {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    gameState.playerX = gameAreaRect.width / 2 - 25;
-    gameState.playerY = gameAreaRect.height - 60;
-    elements.player.style.left = gameState.playerX + 'px';
-    elements.player.style.top = gameState.playerY + 'px';
-  }
-
-  function movePlayer(direction) {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const playerSize = 50;
-    const moveSpeed = 20;
-    
-    let newX = gameState.playerX;
-    let newY = gameState.playerY;
-    
-    switch (direction) {
-      case 'up':
-        newY = Math.max(0, gameState.playerY - moveSpeed);
-        elements.player.classList.add('moving-up');
-        setTimeout(() => elements.player.classList.remove('moving-up'), 300);
-        break;
-      case 'down':
-        newY = Math.min(gameAreaRect.height - playerSize, gameState.playerY + moveSpeed);
-        elements.player.classList.add('moving-down');
-        setTimeout(() => elements.player.classList.remove('moving-down'), 300);
-        break;
-      case 'left':
-        newX = Math.max(0, gameState.playerX - moveSpeed);
-        elements.player.classList.add('moving-left');
-        setTimeout(() => elements.player.classList.remove('moving-left'), 300);
-        break;
-      case 'right':
-        newX = Math.min(gameAreaRect.width - playerSize, gameState.playerX + moveSpeed);
-        elements.player.classList.add('moving-right');
-        setTimeout(() => elements.player.classList.remove('moving-right'), 300);
-        break;
-    }
-    
-    gameState.playerX = newX;
-    gameState.playerY = newY;
-    elements.player.style.left = gameState.playerX + 'px';
-    elements.player.style.top = gameState.playerY + 'px';
-    
-    checkCollisions();
-  }
-
-  function createTrashItem() {
-    const trashData = trashTypes[Math.floor(Math.random() * trashTypes.length)];
-    const item = document.createElement('div');
-    item.className = 'city-trash-item';
-    item.textContent = trashData.emoji;
-    item.dataset.points = trashData.points;
-    item.dataset.type = trashData.type;
-    item.dataset.name = trashData.name;
-    
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 50);
-    const y = Math.random() * (gameAreaRect.height - 100) + 50; // Avoid bottom area
-    
-    item.style.left = x + 'px';
-    item.style.top = y + 'px';
-    
-    elements.trashContainer.appendChild(item);
-    
-    gameState.trashItems.push({
-      element: item,
-      x: x,
-      y: y,
-      data: trashData
-    });
-    
-    return item;
-  }
-
-  function createObstacle() {
-    const obstacleData = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-    const item = document.createElement('div');
-    item.className = 'city-obstacle';
-    item.textContent = obstacleData.emoji;
-    item.dataset.type = obstacleData.type;
-    item.dataset.name = obstacleData.name;
-    
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 50);
-    const y = Math.random() * (gameAreaRect.height - 150) + 100;
-    
-    item.style.left = x + 'px';
-    item.style.top = y + 'px';
-    
-    elements.obstacleContainer.appendChild(item);
-    
-    gameState.obstacles.push({
-      element: item,
-      x: x,
-      y: y,
-      data: obstacleData
-    });
-    
-    return item;
-  }
-
-  function createNPC() {
-    const npcData = npcTypes[Math.floor(Math.random() * npcTypes.length)];
-    const item = document.createElement('div');
-    item.className = 'city-npc';
-    item.textContent = npcData.emoji;
-    item.dataset.type = npcData.type;
-    item.dataset.name = npcData.name;
-    
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 50);
-    const y = Math.random() * (gameAreaRect.height - 150) + 100;
-    
-    item.style.left = x + 'px';
-    item.style.top = y + 'px';
-    
-    elements.npcContainer.appendChild(item);
-    
-    gameState.npcs.push({
-      element: item,
-      x: x,
-      y: y,
-      data: npcData
-    });
-    
-    return item;
-  }
-
-  function checkCollisions() {
-    const playerRect = elements.player.getBoundingClientRect();
-    
-    // Check trash collection
-    gameState.trashItems.forEach((item, index) => {
-      const itemRect = item.element.getBoundingClientRect();
-      if (checkCollision(playerRect, itemRect)) {
-        collectTrash(item, index);
-      }
-    });
-  }
-
-  function checkCollision(rect1, rect2) {
-    return !(rect1.right < rect2.left || 
-             rect1.left > rect2.right || 
-             rect1.bottom < rect2.top || 
-             rect1.top > rect2.bottom);
-  }
-
-  function collectTrash(item, index) {
-    const points = parseInt(item.data.points);
-    const comboMultiplier = Math.min(gameState.combo + 1, 5);
-    const totalPoints = points * comboMultiplier;
-    
-    gameState.score += totalPoints;
-    gameState.trashCleaned++;
-    gameState.combo++;
-    gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
-    
-    // Reset combo timer
-    if (gameState.comboTimer) {
-      clearTimeout(gameState.comboTimer);
-    }
-    
-    gameState.comboTimer = setTimeout(() => {
-      gameState.combo = 0;
-      updateUI();
-    }, 3000);
-    
-    // Create visual effects
-    createScorePopup(item.element, `+${totalPoints}`, '#FFD700');
-    if (gameState.combo > 1) {
-      createComboPopup(item.element, `${gameState.combo}x COMBO!`, '#FF6B6B');
-    }
-    
-    // Add collection effect
-    item.element.classList.add('city-collected-effect');
-    
-    setTimeout(() => {
-      if (item.element && item.element.parentNode) {
-        item.element.remove();
-      }
-      gameState.trashItems.splice(index, 1);
-    }, 600);
-    
-    checkLevelUp();
-    checkAchievements();
-    updateUI();
-  }
-
-  function createScorePopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'city-score-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.style.left;
-    popup.style.top = element.style.top;
-    
-    elements.gameArea.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1000);
-  }
-
-  function createComboPopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'city-combo-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.style.left;
-    popup.style.top = (parseInt(element.style.top) - 30) + 'px';
-    
-    elements.gameArea.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1200);
-  }
-
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.trashCleaned / 15) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      
-      // Show level up effect
-      const levelUpEffect = document.createElement('div');
-      levelUpEffect.className = 'level-up-effect';
-      levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
-      elements.gameArea.appendChild(levelUpEffect);
-      
-      setTimeout(() => levelUpEffect.remove(), 2000);
-      
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
-      addConfetti();
-    }
-  }
-
-  function checkAchievements() {
-    // Street Sweeper
-    if (gameState.trashCleaned >= 20 && !gameState.achievements['street-sweeper']) {
-      unlockAchievement('street-sweeper', 'Street Sweeper! 🧹');
-    }
-    
-    // City Hero
-    if (gameState.score >= 300 && !gameState.achievements['city-hero']) {
-      unlockAchievement('city-hero', 'City Hero! 🦸');
-    }
-    
-    // Clean Machine
-    if (gameState.maxCombo >= 10 && !gameState.achievements['clean-machine']) {
-      unlockAchievement('clean-machine', 'Clean Machine! ⚡');
-    }
-  }
-
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 50; // Bonus points for achievements
-    updateUI();
-  }
-
-  function spawnItems() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    // Spawn trash (main objective)
-    if (Math.random() < 0.8) {
-      createTrashItem();
-    }
-    
-    // Spawn obstacles occasionally
-    if (Math.random() < 0.2 && gameState.obstacles.length < 3) {
-      createObstacle();
-    }
-    
-    // Spawn NPCs occasionally
-    if (Math.random() < 0.3 && gameState.npcs.length < 2) {
-      createNPC();
-    }
-  }
-
-  function startGame() {
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    initializePlayer();
-    
-    // Start game timer
-    gameState.timerInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
-        }
-      }
-    }, 1000);
-    
-    // Start spawning items
-    gameState.spawnInterval = setInterval(spawnItems, 2000);
-    
-    // Initial spawn
-    for (let i = 0; i < 5; i++) {
-      createTrashItem();
-    }
-    
-    showMessage('City cleanup started! Collect trash to clean the city!', 'info');
-  }
-
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
-    }
-  }
-
-  function resetGame() {
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.comboTimer) clearTimeout(gameState.comboTimer);
-    
-    // Clear items
-    gameState.trashItems.forEach(item => {
-      if (item.element && item.element.parentNode) {
-        item.element.remove();
-      }
-    });
-    gameState.obstacles.forEach(item => {
-      if (item.element && item.element.parentNode) {
-        item.element.remove();
-      }
-    });
-    gameState.npcs.forEach(item => {
-      if (item.element && item.element.parentNode) {
-        item.element.remove();
-      }
-    });
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.trashCleaned = 0;
-    gameState.level = 1;
-    gameState.timeLeft = 60;
-    gameState.combo = 0;
-    gameState.maxCombo = 0;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    gameState.trashItems = [];
-    gameState.obstacles = [];
-    gameState.npcs = [];
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
-      if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
-      }
-    });
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
-    initializePlayer();
-    updateUI();
-    showMessage('City game reset!', 'info');
-  }
-
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.comboTimer) clearTimeout(gameState.comboTimer);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`City Cleanup (Score: ${finalScore})`, pointsEarned);
-    }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Trash Cleaned: ${gameState.trashCleaned} | Max Combo: ${gameState.maxCombo}x | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 200) {
-      addConfetti();
-    }
-  }
-
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
-
-  // Mobile controls
-  elements.moveUpBtn.addEventListener('click', () => movePlayer('up'));
-  elements.moveDownBtn.addEventListener('click', () => movePlayer('down'));
-  elements.moveLeftBtn.addEventListener('click', () => movePlayer('left'));
-  elements.moveRightBtn.addEventListener('click', () => movePlayer('right'));
-
-  // Keyboard controls
-  document.addEventListener('keydown', (e) => {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    keys[e.key] = true;
-    
-    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
-      movePlayer('up');
-      e.preventDefault();
-    } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
-      movePlayer('down');
-      e.preventDefault();
-    } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-      movePlayer('left');
-      e.preventDefault();
-    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-      movePlayer('right');
-      e.preventDefault();
-    }
-  });
-
-  document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-  });
-
-  // Initialize UI
-  initializePlayer();
-  updateUI();
-  showMessage('Clean the City game loaded! Click Start Cleaning to begin!', 'info');
-}
-
-// Rainwater Collector Game Implementation
-function initRainwaterCollectorGame() {
-  const gameState = {
-    score: 0,
-    waterCollected: 0,
-    level: 1,
-    timeLeft: 60,
-    streak: 0,
-    maxStreak: 0,
-    isPlaying: false,
-    isPaused: false,
-    bucketX: 0,
-    gameSpeed: 1,
-    dropSpawnRate: 1500,
-    gameInterval: null,
-    spawnInterval: null,
-    timerInterval: null,
-    streakTimer: null,
-    lightningTimer: null,
-    fallingDrops: [],
-    achievements: {
-      'water-saver': false,
-      'rain-master': false,
-      'conservation-hero': false
-    }
-  };
-
-  const dropTypes = [
-    { emoji: '💧', name: 'Regular Drop', points: 5, water: 1, type: 'regular', probability: 0.7 },
-    { emoji: '💎', name: 'Pure Drop', points: 15, water: 3, type: 'special', probability: 0.15 },
-    { emoji: '🌟', name: 'Golden Drop', points: 25, water: 5, type: 'special', probability: 0.05 },
-    { emoji: '☠️', name: 'Contaminated', points: -10, water: -2, type: 'contaminated', probability: 0.1 }
-  ];
-
-  const obstacleTypes = [
-    { emoji: '🍃', name: 'Leaf', type: 'debris' },
-    { emoji: '🪨', name: 'Stone', type: 'debris' },
-    { emoji: '🗑️', name: 'Trash', type: 'pollution' }
-  ];
-
-  const elements = {
-    scoreEl: document.getElementById('rainwater-score'),
-    waterEl: document.getElementById('water-collected'),
-    levelEl: document.getElementById('rainwater-level'),
-    timerEl: document.getElementById('rainwater-timer'),
-    streakEl: document.getElementById('rainwater-streak'),
-    bucket: document.getElementById('rainwater-bucket'),
-    gameArea: document.getElementById('rainwater-game-area'),
-    raindropsContainer: document.getElementById('raindrops-container'),
-    specialDrops: document.getElementById('special-drops'),
-    obstaclesContainer: document.getElementById('rain-obstacles'),
-    lightningEffects: document.getElementById('lightning-effects'),
-    startBtn: document.getElementById('start-rainwater-game'),
-    pauseBtn: document.getElementById('pause-rainwater-game'),
-    resetBtn: document.getElementById('reset-rainwater-game'),
-    moveLeftBtn: document.getElementById('rainwater-move-left'),
-    moveRightBtn: document.getElementById('rainwater-move-right'),
-    achievementsContainer: document.getElementById('rainwater-achievements')
-  };
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.waterEl.textContent = gameState.waterCollected;
-    elements.levelEl.textContent = gameState.level;
-    elements.timerEl.textContent = gameState.timeLeft;
-    elements.streakEl.textContent = gameState.streak;
-    
-    // Add streak glow effect
-    if (gameState.streak > 0) {
-      elements.streakEl.parentElement.classList.add('streak-active');
-    } else {
-      elements.streakEl.parentElement.classList.remove('streak-active');
-    }
-  }
-
-  function initializeBucket() {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    gameState.bucketX = gameAreaRect.width / 2 - 25;
-    elements.bucket.style.left = gameState.bucketX + 'px';
-  }
-
-  function moveBucket(direction) {
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const bucketWidth = 50;
-    const moveSpeed = 25;
-    
-    if (direction === 'left') {
-      gameState.bucketX = Math.max(0, gameState.bucketX - moveSpeed);
-    } else if (direction === 'right') {
-      gameState.bucketX = Math.min(gameAreaRect.width - bucketWidth, gameState.bucketX + moveSpeed);
-    }
-    
-    elements.bucket.style.left = gameState.bucketX + 'px';
-  }
-
-  function createDrop() {
-    // Determine drop type based on probability
-    const rand = Math.random();
-    let cumulativeProbability = 0;
-    let selectedDrop = dropTypes[0];
-    
-    for (const dropType of dropTypes) {
-      cumulativeProbability += dropType.probability;
-      if (rand <= cumulativeProbability) {
-        selectedDrop = dropType;
-        break;
-      }
+      });
     }
 
-    const drop = document.createElement('div');
-    drop.className = `raindrop ${selectedDrop.type}`;
-    drop.textContent = selectedDrop.emoji;
-    drop.dataset.points = selectedDrop.points;
-    drop.dataset.water = selectedDrop.water;
-    drop.dataset.type = selectedDrop.type;
-    drop.dataset.name = selectedDrop.name;
-    
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 30);
-    drop.style.left = x + 'px';
-    drop.style.top = '0px';
-    
-    if (selectedDrop.type === 'special') {
-      elements.specialDrops.appendChild(drop);
-    } else {
-      elements.raindropsContainer.appendChild(drop);
+    function checkCollision(rect1, rect2) {
+      return !(rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom);
     }
-    
-    gameState.fallingDrops.push({
-      element: drop,
-      x: x,
-      y: 0,
-      speed: (2 + gameState.level * 0.3) * gameState.gameSpeed,
-      data: selectedDrop
-    });
-    
-    return drop;
-  }
 
-  function createObstacle() {
-    const obstacleData = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-    const obstacle = document.createElement('div');
-    obstacle.className = 'obstacle';
-    obstacle.textContent = obstacleData.emoji;
-    obstacle.dataset.type = obstacleData.type;
-    obstacle.dataset.name = obstacleData.name;
-    
-    const gameAreaRect = elements.gameArea.getBoundingClientRect();
-    const x = Math.random() * (gameAreaRect.width - 30);
-    obstacle.style.left = x + 'px';
-    obstacle.style.top = '0px';
-    
-    elements.obstaclesContainer.appendChild(obstacle);
-    
-    gameState.fallingDrops.push({
-      element: obstacle,
-      x: x,
-      y: 0,
-      speed: 1.5 * gameState.gameSpeed,
-      data: { ...obstacleData, points: -5, water: 0, type: 'obstacle' }
-    });
-    
-    return obstacle;
-  }
+    function handleDropCollection(drop, index) {
+      const dropData = drop.data;
 
-  function updateFallingDrops() {
-    gameState.fallingDrops.forEach((drop, index) => {
-      drop.y += drop.speed;
-      drop.element.style.top = drop.y + 'px';
-      
-      // Check collision with bucket
-      const bucketRect = elements.bucket.getBoundingClientRect();
-      const dropRect = drop.element.getBoundingClientRect();
-      
-      if (checkCollision(bucketRect, dropRect)) {
-        handleDropCollection(drop, index);
-        return;
-      }
-      
-      // Remove drops that fall off screen
-      if (drop.y > elements.gameArea.offsetHeight) {
-        if (drop.data.type === 'regular' || drop.data.type === 'special') {
-          // Reset streak for missed water drops
-          gameState.streak = 0;
-          updateUI();
-        }
-        removeDrop(drop, index);
-      }
-    });
-  }
-
-  function checkCollision(rect1, rect2) {
-    return !(rect1.right < rect2.left || 
-             rect1.left > rect2.right || 
-             rect1.bottom < rect2.top || 
-             rect1.top > rect2.bottom);
-  }
-
-  function handleDropCollection(drop, index) {
-    const dropData = drop.data;
-    
-    if (dropData.type === 'obstacle') {
-      // Hit obstacle - lose points and reset streak
-      gameState.score = Math.max(0, gameState.score + dropData.points);
-      gameState.streak = 0;
-      
-      createScorePopup(drop.element, `${dropData.points}`, '#ff4444');
-      
-    } else {
-      // Collect water drop
-      const streakMultiplier = Math.min(Math.floor(gameState.streak / 5) + 1, 3);
-      const points = dropData.points * streakMultiplier;
-      const water = Math.max(0, dropData.water);
-      
-      gameState.score += points;
-      gameState.waterCollected += water;
-      
-      if (dropData.type !== 'contaminated') {
-        gameState.streak++;
-        gameState.maxStreak = Math.max(gameState.maxStreak, gameState.streak);
-        
-        // Reset streak timer
-        if (gameState.streakTimer) {
-          clearTimeout(gameState.streakTimer);
-        }
-        
-        gameState.streakTimer = setTimeout(() => {
-          gameState.streak = 0;
-          updateUI();
-        }, 3000);
-      } else {
+      if (dropData.type === 'obstacle') {
+        // Hit obstacle - lose points and reset streak
+        gameState.score = Math.max(0, gameState.score + dropData.points);
         gameState.streak = 0;
-      }
-      
-      // Visual effects
-      createScorePopup(drop.element, `+${points}`, dropData.type === 'contaminated' ? '#ff4444' : '#FFD700');
-      createWaterSplash(drop.element);
-      
-      if (gameState.streak > 1 && gameState.streak % 5 === 0) {
-        createStreakPopup(drop.element, `${gameState.streak} STREAK!`, '#4FC3F7');
-      }
-      
-      // Bucket bounce effect
-      elements.bucket.classList.add('collecting');
-      setTimeout(() => elements.bucket.classList.remove('collecting'), 300);
-    }
-    
-    // Add collection effect
-    drop.element.classList.add('collected-drop');
-    
-    setTimeout(() => {
-      removeDrop(drop, index);
-    }, 600);
-    
-    checkLevelUp();
-    checkAchievements();
-    updateUI();
-  }
 
-  function createScorePopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'rainwater-score-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.style.left;
-    popup.style.top = element.style.top;
-    
-    elements.gameArea.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1000);
-  }
+        createScorePopup(drop.element, `${dropData.points}`, '#ff4444');
 
-  function createWaterSplash(element) {
-    const splash = document.createElement('div');
-    splash.className = 'water-splash';
-    splash.textContent = '💦';
-    splash.style.left = element.style.left;
-    splash.style.top = element.style.top;
-    
-    elements.gameArea.appendChild(splash);
-    
-    setTimeout(() => splash.remove(), 800);
-  }
+      } else {
+        // Collect water drop
+        const streakMultiplier = Math.min(Math.floor(gameState.streak / 5) + 1, 3);
+        const points = dropData.points * streakMultiplier;
+        const water = Math.max(0, dropData.water);
 
-  function createStreakPopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'streak-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.style.left;
-    popup.style.top = (parseInt(element.style.top) - 30) + 'px';
-    
-    elements.gameArea.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1200);
-  }
+        gameState.score += points;
+        gameState.waterCollected += water;
 
-  function removeDrop(drop, index) {
-    if (drop.element && drop.element.parentNode) {
-      drop.element.remove();
-    }
-    gameState.fallingDrops.splice(index, 1);
-  }
+        if (dropData.type !== 'contaminated') {
+          gameState.streak++;
+          gameState.maxStreak = Math.max(gameState.maxStreak, gameState.streak);
 
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.waterCollected / 20) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      gameState.gameSpeed += 0.2;
-      gameState.dropSpawnRate = Math.max(800, gameState.dropSpawnRate - 100);
-      
-      // Restart spawn interval with new rate
-      if (gameState.spawnInterval) {
-        clearInterval(gameState.spawnInterval);
-        gameState.spawnInterval = setInterval(spawnItems, gameState.dropSpawnRate);
-      }
-      
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
-      createLightningEffect();
-      addConfetti();
-    }
-  }
+          // Reset streak timer
+          if (gameState.streakTimer) {
+            clearTimeout(gameState.streakTimer);
+          }
 
-  function checkAchievements() {
-    // Water Saver
-    if (gameState.waterCollected >= 30 && !gameState.achievements['water-saver']) {
-      unlockAchievement('water-saver', 'Water Saver! 💧');
-    }
-    
-    // Rain Master
-    if (gameState.maxStreak >= 15 && !gameState.achievements['rain-master']) {
-      unlockAchievement('rain-master', 'Rain Master! 🌧️');
-    }
-    
-    // Conservation Hero
-    if (gameState.score >= 500 && !gameState.achievements['conservation-hero']) {
-      unlockAchievement('conservation-hero', 'Conservation Hero! 🏆');
-    }
-  }
-
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 100; // Bonus points for achievements
-    updateUI();
-  }
-
-  function spawnItems() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    // Spawn raindrops (main objective)
-    if (Math.random() < 0.8) {
-      createDrop();
-    }
-    
-    // Spawn obstacles occasionally
-    if (Math.random() < 0.15) {
-      createObstacle();
-    }
-  }
-
-  function createLightningEffect() {
-    const lightning = document.createElement('div');
-    lightning.className = 'lightning-flash';
-    elements.lightningEffects.appendChild(lightning);
-    
-    setTimeout(() => lightning.remove(), 300);
-  }
-
-  function startGame() {
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    initializeBucket();
-    
-    // Start game timer
-    gameState.timerInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
+          gameState.streakTimer = setTimeout(() => {
+            gameState.streak = 0;
+            updateUI();
+          }, 3000);
+        } else {
+          gameState.streak = 0;
         }
-      }
-    }, 1000);
-    
-    // Start spawning drops
-    gameState.spawnInterval = setInterval(spawnItems, gameState.dropSpawnRate);
-    
-    // Start game loop
-    gameState.gameInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        updateFallingDrops();
-      }
-    }, 50);
-    
-    // Random lightning effects
-    gameState.lightningTimer = setInterval(() => {
-      if (!gameState.isPaused && Math.random() < 0.3) {
-        createLightningEffect();
-      }
-    }, 5000);
-    
-    showMessage('Rainwater collection started! Catch the drops!', 'info');
-  }
 
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
+        // Visual effects
+        createScorePopup(drop.element, `+${points}`, dropData.type === 'contaminated' ? '#ff4444' : '#FFD700');
+        createWaterSplash(drop.element);
+
+        if (gameState.streak > 1 && gameState.streak % 5 === 0) {
+          createStreakPopup(drop.element, `${gameState.streak} STREAK!`, '#4FC3F7');
+        }
+
+        // Bucket bounce effect
+        elements.bucket.classList.add('collecting');
+        setTimeout(() => elements.bucket.classList.remove('collecting'), 300);
+      }
+
+      // Add collection effect
+      drop.element.classList.add('collected-drop');
+
+      setTimeout(() => {
+        removeDrop(drop, index);
+      }, 600);
+
+      checkLevelUp();
+      checkAchievements();
+      updateUI();
     }
-  }
 
-  function resetGame() {
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.streakTimer) clearTimeout(gameState.streakTimer);
-    if (gameState.lightningTimer) clearInterval(gameState.lightningTimer);
-    
-    // Clear falling drops
-    gameState.fallingDrops.forEach(drop => {
+    function createScorePopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'rainwater-score-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.style.left;
+      popup.style.top = element.style.top;
+
+      elements.gameArea.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    function createWaterSplash(element) {
+      const splash = document.createElement('div');
+      splash.className = 'water-splash';
+      splash.textContent = '💦';
+      splash.style.left = element.style.left;
+      splash.style.top = element.style.top;
+
+      elements.gameArea.appendChild(splash);
+
+      setTimeout(() => splash.remove(), 800);
+    }
+
+    function createStreakPopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'streak-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.style.left;
+      popup.style.top = (parseInt(element.style.top) - 30) + 'px';
+
+      elements.gameArea.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1200);
+    }
+
+    function removeDrop(drop, index) {
       if (drop.element && drop.element.parentNode) {
         drop.element.remove();
       }
-    });
-    gameState.fallingDrops = [];
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.waterCollected = 0;
-    gameState.level = 1;
-    gameState.timeLeft = 60;
-    gameState.streak = 0;
-    gameState.maxStreak = 0;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    gameState.gameSpeed = 1;
-    gameState.dropSpawnRate = 1500;
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
-      if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
-      }
-    });
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
-    initializeBucket();
-    updateUI();
-    showMessage('Rainwater game reset!', 'info');
-  }
-
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.streakTimer) clearTimeout(gameState.streakTimer);
-    if (gameState.lightningTimer) clearInterval(gameState.lightningTimer);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`Rainwater Collection (Score: ${finalScore})`, pointsEarned);
+      gameState.fallingDrops.splice(index, 1);
     }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Water Collected: ${gameState.waterCollected}L | Max Streak: ${gameState.maxStreak} | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 300) {
-      addConfetti();
-    }
-  }
 
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.waterCollected / 20) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+        gameState.gameSpeed += 0.2;
+        gameState.dropSpawnRate = Math.max(800, gameState.dropSpawnRate - 100);
 
-  // Mobile controls
-  elements.moveLeftBtn.addEventListener('click', () => moveBucket('left'));
-  elements.moveRightBtn.addEventListener('click', () => moveBucket('right'));
-
-  // Keyboard controls
-  document.addEventListener('keydown', (e) => {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-      moveBucket('left');
-      e.preventDefault();
-    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-      moveBucket('right');
-      e.preventDefault();
-    }
-  });
-
-  // Initialize UI
-  initializeBucket();
-  updateUI();
-  showMessage('Rainwater Collector game loaded! Click Start Collecting to begin!', 'info');
-}
-
-// Solar Panel Builder Game Implementation
-function initSolarPanelBuilderGame() {
-  const gameState = {
-    score: 0,
-    energyGenerated: 0,
-    panelsPlaced: 0,
-    level: 1,
-    timeLeft: 60,
-    sunIntensity: 100,
-    isPlaying: false,
-    isPaused: false,
-    gameInterval: null,
-    timerInterval: null,
-    sunInterval: null,
-    energyInterval: null,
-    placedPanels: [],
-    roofCapacities: {
-      house: { max: 2, current: 0 },
-      office: { max: 4, current: 0 },
-      factory: { max: 6, current: 0 }
-    },
-    achievements: {
-      'solar-starter': false,
-      'energy-master': false,
-      'green-builder': false
-    }
-  };
-
-  const panelTypes = {
-    basic: { emoji: '🔋', power: 5, points: 10, name: 'Basic Panel' },
-    advanced: { emoji: '⚡', power: 10, points: 20, name: 'Advanced Panel' },
-    premium: { emoji: '💎', power: 15, points: 30, name: 'Premium Panel' }
-  };
-
-  const elements = {
-    scoreEl: document.getElementById('solar-score'),
-    energyEl: document.getElementById('energy-generated'),
-    panelsEl: document.getElementById('panels-placed'),
-    levelEl: document.getElementById('solar-level'),
-    timerEl: document.getElementById('solar-timer'),
-    sunIntensityEl: document.getElementById('sun-intensity'),
-    sunMeterFill: document.getElementById('sun-meter-fill'),
-    sunPosition: document.getElementById('sun-position'),
-    gameArea: document.getElementById('solar-game-area'),
-    buildingsContainer: document.getElementById('buildings-container'),
-    energyIndicators: document.getElementById('energy-indicators'),
-    startBtn: document.getElementById('start-solar-game'),
-    pauseBtn: document.getElementById('pause-solar-game'),
-    resetBtn: document.getElementById('reset-solar-game'),
-    achievementsContainer: document.getElementById('solar-achievements')
-  };
-
-  let draggedPanel = null;
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.energyEl.textContent = gameState.energyGenerated;
-    elements.panelsEl.textContent = gameState.panelsPlaced;
-    elements.levelEl.textContent = gameState.level;
-    elements.timerEl.textContent = gameState.timeLeft;
-    elements.sunIntensityEl.textContent = gameState.sunIntensity + '%';
-    elements.sunMeterFill.style.width = gameState.sunIntensity + '%';
-    
-    // Update sun intensity visual effects
-    const container = document.getElementById('solar-container');
-    container.classList.remove('high-intensity', 'medium-intensity', 'low-intensity');
-    
-    if (gameState.sunIntensity >= 80) {
-      container.classList.add('high-intensity');
-    } else if (gameState.sunIntensity >= 50) {
-      container.classList.add('medium-intensity');
-    } else {
-      container.classList.add('low-intensity');
-    }
-  }
-
-  function initializeDragAndDrop() {
-    const panelItems = document.querySelectorAll('.solar-panel-item');
-    const roofAreas = document.querySelectorAll('.roof-area');
-
-    panelItems.forEach(panel => {
-      panel.addEventListener('dragstart', handleDragStart);
-      panel.addEventListener('dragend', handleDragEnd);
-    });
-
-    roofAreas.forEach(roof => {
-      roof.addEventListener('dragover', handleDragOver);
-      roof.addEventListener('dragenter', handleDragEnter);
-      roof.addEventListener('dragleave', handleDragLeave);
-      roof.addEventListener('drop', handleDrop);
-    });
-  }
-
-  function handleDragStart(e) {
-    if (!gameState.isPlaying || gameState.isPaused) {
-      e.preventDefault();
-      return;
-    }
-    
-    draggedPanel = {
-      type: e.target.dataset.panel,
-      element: e.target
-    };
-    
-    e.target.style.opacity = '0.5';
-    e.dataTransfer.effectAllowed = 'move';
-  }
-
-  function handleDragEnd(e) {
-    e.target.style.opacity = '1';
-    draggedPanel = null;
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
-
-  function handleDragEnter(e) {
-    e.preventDefault();
-    e.target.classList.add('drag-over');
-  }
-
-  function handleDragLeave(e) {
-    e.target.classList.remove('drag-over');
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    e.target.classList.remove('drag-over');
-    
-    if (!draggedPanel || !gameState.isPlaying || gameState.isPaused) return;
-    
-    const roofType = e.target.dataset.roof;
-    const capacity = gameState.roofCapacities[roofType];
-    
-    if (capacity.current >= capacity.max) {
-      showMessage(`${roofType} roof is full! (${capacity.current}/${capacity.max})`, 'warning');
-      return;
-    }
-    
-    placePanelOnRoof(e.target, roofType, draggedPanel.type);
-  }
-
-  function placePanelOnRoof(roofElement, roofType, panelType) {
-    const panelData = panelTypes[panelType];
-    const capacity = gameState.roofCapacities[roofType];
-    
-    // Create placed panel element
-    const placedPanel = document.createElement('div');
-    placedPanel.className = 'placed-panel';
-    placedPanel.textContent = panelData.emoji;
-    placedPanel.dataset.panelType = panelType;
-    placedPanel.dataset.roofType = roofType;
-    
-    // Position panel within roof area
-    const panelSize = 20;
-    const cols = Math.floor(roofElement.offsetWidth / (panelSize + 2));
-    const currentIndex = capacity.current;
-    const row = Math.floor(currentIndex / cols);
-    const col = currentIndex % cols;
-    
-    placedPanel.style.left = (col * (panelSize + 2) + 2) + 'px';
-    placedPanel.style.top = (row * (panelSize + 2) + 2) + 'px';
-    placedPanel.style.width = panelSize + 'px';
-    placedPanel.style.height = panelSize + 'px';
-    
-    roofElement.appendChild(placedPanel);
-    
-    // Update game state
-    capacity.current++;
-    gameState.panelsPlaced++;
-    gameState.score += panelData.points;
-    
-    // Add to placed panels array
-    gameState.placedPanels.push({
-      element: placedPanel,
-      type: panelType,
-      roof: roofType,
-      power: panelData.power
-    });
-    
-    // Visual effects
-    createScorePopup(placedPanel, `+${panelData.points}`, '#FFD700');
-    createEnergyFlow(placedPanel);
-    
-    checkLevelUp();
-    checkAchievements();
-    updateUI();
-    
-    showMessage(`${panelData.name} placed on ${roofType}! (+${panelData.power}kW)`, 'success');
-  }
-
-  function createScorePopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'solar-score-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.offsetLeft + 'px';
-    popup.style.top = element.offsetTop + 'px';
-    
-    element.parentElement.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1000);
-  }
-
-  function createEnergyFlow(panelElement) {
-    const flow = document.createElement('div');
-    flow.className = 'energy-flow';
-    flow.textContent = '⚡';
-    flow.style.left = panelElement.offsetLeft + 'px';
-    flow.style.top = panelElement.offsetTop + 'px';
-    
-    elements.energyIndicators.appendChild(flow);
-    
-    setTimeout(() => flow.remove(), 2000);
-  }
-
-  function updateSunIntensity() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    // Simulate sun intensity changes (clouds, time of day)
-    const change = (Math.random() - 0.5) * 20;
-    gameState.sunIntensity = Math.max(20, Math.min(100, gameState.sunIntensity + change));
-    
-    updateUI();
-  }
-
-  function generateEnergy() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    let totalEnergy = 0;
-    const intensityMultiplier = gameState.sunIntensity / 100;
-    
-    gameState.placedPanels.forEach(panel => {
-      const energy = panel.power * intensityMultiplier;
-      totalEnergy += energy;
-      
-      // Create energy flow animation occasionally
-      if (Math.random() < 0.3) {
-        createEnergyFlow(panel.element);
-      }
-    });
-    
-    gameState.energyGenerated += totalEnergy;
-    gameState.score += Math.floor(totalEnergy);
-    
-    updateUI();
-  }
-
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.panelsPlaced / 5) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      
-      // Show level up effect
-      const levelUpEffect = document.createElement('div');
-      levelUpEffect.className = 'solar-level-up';
-      levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
-      elements.gameArea.appendChild(levelUpEffect);
-      
-      setTimeout(() => levelUpEffect.remove(), 2000);
-      
-      showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
-      addConfetti();
-    }
-  }
-
-  function checkAchievements() {
-    // Solar Starter
-    if (gameState.panelsPlaced >= 5 && !gameState.achievements['solar-starter']) {
-      unlockAchievement('solar-starter', 'Solar Starter! 🔋');
-    }
-    
-    // Energy Master
-    if (gameState.energyGenerated >= 200 && !gameState.achievements['energy-master']) {
-      unlockAchievement('energy-master', 'Energy Master! ⚡');
-    }
-    
-    // Green Builder
-    if (gameState.score >= 500 && !gameState.achievements['green-builder']) {
-      unlockAchievement('green-builder', 'Green Builder! 🌱');
-    }
-  }
-
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 100; // Bonus points for achievements
-    updateUI();
-  }
-
-  function startGame() {
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    // Start game timer
-    gameState.timerInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
+        // Restart spawn interval with new rate
+        if (gameState.spawnInterval) {
+          clearInterval(gameState.spawnInterval);
+          gameState.spawnInterval = setInterval(spawnItems, gameState.dropSpawnRate);
         }
-      }
-    }, 1000);
-    
-    // Start sun intensity changes
-    gameState.sunInterval = setInterval(updateSunIntensity, 3000);
-    
-    // Start energy generation
-    gameState.energyInterval = setInterval(generateEnergy, 1000);
-    
-    showMessage('Solar panel building started! Drag panels to roofs!', 'info');
-  }
 
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+        createLightningEffect();
+        addConfetti();
+      }
     }
-  }
 
-  function resetGame() {
-    // Clear intervals
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.sunInterval) clearInterval(gameState.sunInterval);
-    if (gameState.energyInterval) clearInterval(gameState.energyInterval);
-    
-    // Clear placed panels
-    gameState.placedPanels.forEach(panel => {
-      if (panel.element && panel.element.parentNode) {
-        panel.element.remove();
+    function checkAchievements() {
+      // Water Saver
+      if (gameState.waterCollected >= 30 && !gameState.achievements['water-saver']) {
+        unlockAchievement('water-saver', 'Water Saver! 💧');
       }
-    });
-    gameState.placedPanels = [];
-    
-    // Reset roof capacities
-    Object.keys(gameState.roofCapacities).forEach(roof => {
-      gameState.roofCapacities[roof].current = 0;
-    });
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.energyGenerated = 0;
-    gameState.panelsPlaced = 0;
-    gameState.level = 1;
-    gameState.timeLeft = 60;
-    gameState.sunIntensity = 100;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+
+      // Rain Master
+      if (gameState.maxStreak >= 15 && !gameState.achievements['rain-master']) {
+        unlockAchievement('rain-master', 'Rain Master! 🌧️');
+      }
+
+      // Conservation Hero
+      if (gameState.score >= 500 && !gameState.achievements['conservation-hero']) {
+        unlockAchievement('conservation-hero', 'Conservation Hero! 🏆');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
       if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
       }
-    });
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
-    updateUI();
-    showMessage('Solar panel game reset!', 'info');
-  }
 
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.sunInterval) clearInterval(gameState.sunInterval);
-    if (gameState.energyInterval) clearInterval(gameState.energyInterval);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`Solar Panel Building (Score: ${finalScore})`, pointsEarned);
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 100; // Bonus points for achievements
+      updateUI();
     }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Energy Generated: ${Math.floor(gameState.energyGenerated)}kW | Panels Placed: ${gameState.panelsPlaced} | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 400) {
-      addConfetti();
-    }
-  }
 
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
+    function spawnItems() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
 
-  // Initialize drag and drop
-  initializeDragAndDrop();
-  
-  // Initialize UI
-  updateUI();
-  showMessage('Solar Panel Builder game loaded! Click Start Building to begin!', 'info');
-}
-
-// Save the Forest Game Implementation
-function initSaveTheForestGame() {
-  const gameState = {
-    score: 0,
-    treesSaved: 0,
-    firesExtinguished: 0,
-    level: 1,
-    timeLeft: 60,
-    fireDanger: 30,
-    isPlaying: false,
-    isPaused: false,
-    gameInterval: null,
-    timerInterval: null,
-    fireSpreadInterval: null,
-    helicopterInterval: null,
-    forestGrid: [],
-    activeFires: [],
-    tools: {
-      waterHose: { ready: true, cooldown: 0 },
-      fireExtinguisher: { ready: true, cooldown: 0 },
-      helicopter: { ready: false, cooldown: 10 }
-    },
-    achievements: {
-      'fire-fighter': false,
-      'forest-guardian': false,
-      'eco-hero': false
-    }
-  };
-
-  const GRID_SIZE = { rows: 4, cols: 8 };
-  const TREE_STATES = {
-    HEALTHY: 'healthy',
-    BURNING: 'burning',
-    BURNT: 'burnt',
-    SAVED: 'saved'
-  };
-
-  const elements = {
-    scoreEl: document.getElementById('forest-score'),
-    treesSavedEl: document.getElementById('trees-saved'),
-    firesExtinguishedEl: document.getElementById('fires-extinguished'),
-    levelEl: document.getElementById('forest-level'),
-    timerEl: document.getElementById('forest-timer'),
-    fireDangerEl: document.getElementById('fire-danger'),
-    dangerMeterFill: document.getElementById('danger-meter-fill'),
-    forestGrid: document.getElementById('forest-grid'),
-    waterDrops: document.getElementById('water-drops'),
-    fireEffects: document.getElementById('fire-effects'),
-    smokeEffects: document.getElementById('smoke-effects'),
-    helicopter: document.getElementById('rescue-helicopter'),
-    startBtn: document.getElementById('start-forest-game'),
-    pauseBtn: document.getElementById('pause-forest-game'),
-    resetBtn: document.getElementById('reset-forest-game'),
-    waterHoseTool: document.getElementById('water-hose'),
-    fireExtinguisherTool: document.getElementById('fire-extinguisher'),
-    helicopterTool: document.getElementById('helicopter-water'),
-    achievementsContainer: document.getElementById('forest-achievements')
-  };
-
-  function updateUI() {
-    elements.scoreEl.textContent = gameState.score;
-    elements.treesSavedEl.textContent = gameState.treesSaved;
-    elements.firesExtinguishedEl.textContent = gameState.firesExtinguished;
-    elements.levelEl.textContent = gameState.level;
-    elements.timerEl.textContent = gameState.timeLeft;
-    elements.dangerMeterFill.style.width = gameState.fireDanger + '%';
-    
-    // Update fire danger level text
-    if (gameState.fireDanger < 40) {
-      elements.fireDangerEl.textContent = 'Low';
-      elements.fireDangerEl.style.color = '#4CAF50';
-    } else if (gameState.fireDanger < 70) {
-      elements.fireDangerEl.textContent = 'Medium';
-      elements.fireDangerEl.style.color = '#FFC107';
-    } else {
-      elements.fireDangerEl.textContent = 'High';
-      elements.fireDangerEl.style.color = '#FF5722';
-    }
-    
-    updateToolStatus();
-  }
-
-  function updateToolStatus() {
-    // Update tool visual states
-    Object.keys(gameState.tools).forEach(toolName => {
-      const tool = gameState.tools[toolName];
-      const toolElement = elements[toolName + 'Tool'];
-      const statusElement = toolElement.querySelector('.tool-status');
-      
-      toolElement.classList.remove('ready', 'charging');
-      
-      if (tool.ready) {
-        toolElement.classList.add('ready');
-        statusElement.textContent = 'Ready';
-      } else {
-        toolElement.classList.add('charging');
-        statusElement.textContent = `${tool.cooldown}s`;
+      // Spawn raindrops (main objective)
+      if (Math.random() < 0.8) {
+        createDrop();
       }
-    });
-  }
 
-  function initializeForest() {
-    elements.forestGrid.innerHTML = '';
-    gameState.forestGrid = [];
-    
-    for (let row = 0; row < GRID_SIZE.rows; row++) {
-      gameState.forestGrid[row] = [];
-      for (let col = 0; col < GRID_SIZE.cols; col++) {
-        const cell = document.createElement('div');
-        cell.className = 'forest-cell';
-        cell.dataset.row = row;
-        cell.dataset.col = col;
-        
-        const tree = document.createElement('div');
-        tree.className = 'tree healthy';
-        tree.textContent = '🌳';
-        tree.addEventListener('click', () => handleTreeClick(row, col));
-        
-        cell.appendChild(tree);
-        elements.forestGrid.appendChild(cell);
-        
-        gameState.forestGrid[row][col] = {
-          element: tree,
-          state: TREE_STATES.HEALTHY,
-          fireIntensity: 0
-        };
+      // Spawn obstacles occasionally
+      if (Math.random() < 0.15) {
+        createObstacle();
       }
     }
-  }
 
-  function handleTreeClick(row, col) {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    const tree = gameState.forestGrid[row][col];
-    
-    if (tree.state === TREE_STATES.BURNING) {
-      extinguishFire(row, col);
+    function createLightningEffect() {
+      const lightning = document.createElement('div');
+      lightning.className = 'lightning-flash';
+      elements.lightningEffects.appendChild(lightning);
+
+      setTimeout(() => lightning.remove(), 300);
     }
-  }
 
-  function extinguishFire(row, col) {
-    const tree = gameState.forestGrid[row][col];
-    
-    if (tree.state !== TREE_STATES.BURNING) return;
-    
-    // Change tree back to healthy
-    tree.state = TREE_STATES.SAVED;
-    tree.element.className = 'tree saved';
-    tree.element.textContent = '🌳';
-    tree.fireIntensity = 0;
-    
-    // Remove from active fires
-    gameState.activeFires = gameState.activeFires.filter(
-      fire => !(fire.row === row && fire.col === col)
-    );
-    
-    // Update stats
-    gameState.firesExtinguished++;
-    gameState.treesSaved++;
-    gameState.score += 20;
-    
-    // Visual effects
-    createWaterDropEffect(row, col);
-    createScorePopup(tree.element, '+20', '#4CAF50');
-    
-    // Reset to healthy after animation
-    setTimeout(() => {
-      if (tree.state === TREE_STATES.SAVED) {
-        tree.state = TREE_STATES.HEALTHY;
-        tree.element.className = 'tree healthy';
-      }
-    }, 1000);
-    
-    checkLevelUp();
-    checkAchievements();
-    updateUI();
-  }
+    function startGame() {
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
 
-  function startFire() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    // Find healthy trees
-    const healthyTrees = [];
-    for (let row = 0; row < GRID_SIZE.rows; row++) {
-      for (let col = 0; col < GRID_SIZE.cols; col++) {
-        if (gameState.forestGrid[row][col].state === TREE_STATES.HEALTHY) {
-          healthyTrees.push({ row, col });
-        }
-      }
-    }
-    
-    if (healthyTrees.length === 0) return;
-    
-    // Start fire on random healthy tree
-    const randomTree = healthyTrees[Math.floor(Math.random() * healthyTrees.length)];
-    igniteTree(randomTree.row, randomTree.col);
-  }
+      initializeBucket();
 
-  function igniteTree(row, col) {
-    const tree = gameState.forestGrid[row][col];
-    
-    if (tree.state !== TREE_STATES.HEALTHY) return;
-    
-    tree.state = TREE_STATES.BURNING;
-    tree.element.className = 'tree burning';
-    tree.element.textContent = '🔥';
-    tree.fireIntensity = 1;
-    
-    gameState.activeFires.push({ row, col, startTime: Date.now() });
-    
-    createSmokeEffect(row, col);
-    createFireSpreadEffect(row, col);
-    
-    // Increase fire danger
-    gameState.fireDanger = Math.min(100, gameState.fireDanger + 5);
-    updateUI();
-  }
+      // Start game timer
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
 
-  function spreadFires() {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    
-    const newFires = [];
-    
-    gameState.activeFires.forEach(fire => {
-      const { row, col } = fire;
-      const tree = gameState.forestGrid[row][col];
-      
-      // Check if fire should burn out the tree
-      if (Date.now() - fire.startTime > 5000) {
-        tree.state = TREE_STATES.BURNT;
-        tree.element.className = 'tree burnt';
-        tree.element.textContent = '🪵';
-        gameState.score = Math.max(0, gameState.score - 10);
-        return;
-      }
-      
-      // Spread to adjacent trees
-      const directions = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1],  [1, 0],  [1, 1]
-      ];
-      
-      directions.forEach(([dr, dc]) => {
-        const newRow = row + dr;
-        const newCol = col + dc;
-        
-        if (newRow >= 0 && newRow < GRID_SIZE.rows && 
-            newCol >= 0 && newCol < GRID_SIZE.cols) {
-          
-          const adjacentTree = gameState.forestGrid[newRow][newCol];
-          
-          if (adjacentTree.state === TREE_STATES.HEALTHY && 
-              Math.random() < 0.1 * (gameState.level * 0.5)) {
-            newFires.push({ row: newRow, col: newCol });
+          if (gameState.timeLeft <= 0) {
+            endGame();
           }
         }
+      }, 1000);
+
+      // Start spawning drops
+      gameState.spawnInterval = setInterval(spawnItems, gameState.dropSpawnRate);
+
+      // Start game loop
+      gameState.gameInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          updateFallingDrops();
+        }
+      }, 50);
+
+      // Random lightning effects
+      gameState.lightningTimer = setInterval(() => {
+        if (!gameState.isPaused && Math.random() < 0.3) {
+          createLightningEffect();
+        }
+      }, 5000);
+
+      showMessage('Rainwater collection started! Catch the drops!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.streakTimer) clearTimeout(gameState.streakTimer);
+      if (gameState.lightningTimer) clearInterval(gameState.lightningTimer);
+
+      // Clear falling drops
+      gameState.fallingDrops.forEach(drop => {
+        if (drop.element && drop.element.parentNode) {
+          drop.element.remove();
+        }
       });
+      gameState.fallingDrops = [];
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.waterCollected = 0;
+      gameState.level = 1;
+      gameState.timeLeft = 60;
+      gameState.streak = 0;
+      gameState.maxStreak = 0;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+      gameState.gameSpeed = 1;
+      gameState.dropSpawnRate = 1500;
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
+        }
+      });
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      initializeBucket();
+      updateUI();
+      showMessage('Rainwater game reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.spawnInterval) clearInterval(gameState.spawnInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.streakTimer) clearTimeout(gameState.streakTimer);
+      if (gameState.lightningTimer) clearInterval(gameState.lightningTimer);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`Rainwater Collection (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Water Collected: ${gameState.waterCollected}L | Max Streak: ${gameState.maxStreak} | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 300) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Mobile controls
+    elements.moveLeftBtn.addEventListener('click', () => moveBucket('left'));
+    elements.moveRightBtn.addEventListener('click', () => moveBucket('right'));
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        moveBucket('left');
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        moveBucket('right');
+        e.preventDefault();
+      }
     });
-    
-    // Remove burnt trees from active fires
-    gameState.activeFires = gameState.activeFires.filter(fire => {
-      const tree = gameState.forestGrid[fire.row][fire.col];
-      return tree.state === TREE_STATES.BURNING;
-    });
-    
-    // Ignite new fires
-    newFires.forEach(fire => {
-      igniteTree(fire.row, fire.col);
-    });
+
+    // Initialize UI
+    initializeBucket();
+    updateUI();
+    showMessage('Rainwater Collector game loaded! Click Start Collecting to begin!', 'info');
   }
 
-  function createWaterDropEffect(row, col) {
-    const drop = document.createElement('div');
-    drop.className = 'water-drop';
-    drop.textContent = '💧';
-    
-    const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
-    const rect = cell.getBoundingClientRect();
-    const containerRect = elements.forestGrid.getBoundingClientRect();
-    
-    drop.style.left = (rect.left - containerRect.left + 20) + 'px';
-    drop.style.top = (rect.top - containerRect.top + 20) + 'px';
-    
-    elements.waterDrops.appendChild(drop);
-    
-    setTimeout(() => drop.remove(), 1000);
+  // Solar Panel Builder Game Implementation
+  function initSolarPanelBuilderGame() {
+    const gameState = {
+      score: 0,
+      energyGenerated: 0,
+      panelsPlaced: 0,
+      level: 1,
+      timeLeft: 60,
+      sunIntensity: 100,
+      isPlaying: false,
+      isPaused: false,
+      gameInterval: null,
+      timerInterval: null,
+      sunInterval: null,
+      energyInterval: null,
+      placedPanels: [],
+      roofCapacities: {
+        house: { max: 2, current: 0 },
+        office: { max: 4, current: 0 },
+        factory: { max: 6, current: 0 }
+      },
+      achievements: {
+        'solar-starter': false,
+        'energy-master': false,
+        'green-builder': false
+      }
+    };
+
+    const panelTypes = {
+      basic: { emoji: '🔋', power: 5, points: 10, name: 'Basic Panel' },
+      advanced: { emoji: '⚡', power: 10, points: 20, name: 'Advanced Panel' },
+      premium: { emoji: '💎', power: 15, points: 30, name: 'Premium Panel' }
+    };
+
+    const elements = {
+      scoreEl: document.getElementById('solar-score'),
+      energyEl: document.getElementById('energy-generated'),
+      panelsEl: document.getElementById('panels-placed'),
+      levelEl: document.getElementById('solar-level'),
+      timerEl: document.getElementById('solar-timer'),
+      sunIntensityEl: document.getElementById('sun-intensity'),
+      sunMeterFill: document.getElementById('sun-meter-fill'),
+      sunPosition: document.getElementById('sun-position'),
+      gameArea: document.getElementById('solar-game-area'),
+      buildingsContainer: document.getElementById('buildings-container'),
+      energyIndicators: document.getElementById('energy-indicators'),
+      startBtn: document.getElementById('start-solar-game'),
+      pauseBtn: document.getElementById('pause-solar-game'),
+      resetBtn: document.getElementById('reset-solar-game'),
+      achievementsContainer: document.getElementById('solar-achievements')
+    };
+
+    let draggedPanel = null;
+
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.energyEl.textContent = gameState.energyGenerated;
+      elements.panelsEl.textContent = gameState.panelsPlaced;
+      elements.levelEl.textContent = gameState.level;
+      elements.timerEl.textContent = gameState.timeLeft;
+      elements.sunIntensityEl.textContent = gameState.sunIntensity + '%';
+      elements.sunMeterFill.style.width = gameState.sunIntensity + '%';
+
+      // Update sun intensity visual effects
+      const container = document.getElementById('solar-container');
+      container.classList.remove('high-intensity', 'medium-intensity', 'low-intensity');
+
+      if (gameState.sunIntensity >= 80) {
+        container.classList.add('high-intensity');
+      } else if (gameState.sunIntensity >= 50) {
+        container.classList.add('medium-intensity');
+      } else {
+        container.classList.add('low-intensity');
+      }
+    }
+
+    function initializeDragAndDrop() {
+      const panelItems = document.querySelectorAll('.solar-panel-item');
+      const roofAreas = document.querySelectorAll('.roof-area');
+
+      panelItems.forEach(panel => {
+        panel.addEventListener('dragstart', handleDragStart);
+        panel.addEventListener('dragend', handleDragEnd);
+      });
+
+      roofAreas.forEach(roof => {
+        roof.addEventListener('dragover', handleDragOver);
+        roof.addEventListener('dragenter', handleDragEnter);
+        roof.addEventListener('dragleave', handleDragLeave);
+        roof.addEventListener('drop', handleDrop);
+      });
+    }
+
+    function handleDragStart(e) {
+      if (!gameState.isPlaying || gameState.isPaused) {
+        e.preventDefault();
+        return;
+      }
+
+      draggedPanel = {
+        type: e.target.dataset.panel,
+        element: e.target
+      };
+
+      e.target.style.opacity = '0.5';
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      e.target.style.opacity = '1';
+      draggedPanel = null;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDragEnter(e) {
+      e.preventDefault();
+      e.target.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.target.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.target.classList.remove('drag-over');
+
+      if (!draggedPanel || !gameState.isPlaying || gameState.isPaused) return;
+
+      const roofType = e.target.dataset.roof;
+      const capacity = gameState.roofCapacities[roofType];
+
+      if (capacity.current >= capacity.max) {
+        showMessage(`${roofType} roof is full! (${capacity.current}/${capacity.max})`, 'warning');
+        return;
+      }
+
+      placePanelOnRoof(e.target, roofType, draggedPanel.type);
+    }
+
+    function placePanelOnRoof(roofElement, roofType, panelType) {
+      const panelData = panelTypes[panelType];
+      const capacity = gameState.roofCapacities[roofType];
+
+      // Create placed panel element
+      const placedPanel = document.createElement('div');
+      placedPanel.className = 'placed-panel';
+      placedPanel.textContent = panelData.emoji;
+      placedPanel.dataset.panelType = panelType;
+      placedPanel.dataset.roofType = roofType;
+
+      // Position panel within roof area
+      const panelSize = 20;
+      const cols = Math.floor(roofElement.offsetWidth / (panelSize + 2));
+      const currentIndex = capacity.current;
+      const row = Math.floor(currentIndex / cols);
+      const col = currentIndex % cols;
+
+      placedPanel.style.left = (col * (panelSize + 2) + 2) + 'px';
+      placedPanel.style.top = (row * (panelSize + 2) + 2) + 'px';
+      placedPanel.style.width = panelSize + 'px';
+      placedPanel.style.height = panelSize + 'px';
+
+      roofElement.appendChild(placedPanel);
+
+      // Update game state
+      capacity.current++;
+      gameState.panelsPlaced++;
+      gameState.score += panelData.points;
+
+      // Add to placed panels array
+      gameState.placedPanels.push({
+        element: placedPanel,
+        type: panelType,
+        roof: roofType,
+        power: panelData.power
+      });
+
+      // Visual effects
+      createScorePopup(placedPanel, `+${panelData.points}`, '#FFD700');
+      createEnergyFlow(placedPanel);
+
+      checkLevelUp();
+      checkAchievements();
+      updateUI();
+
+      showMessage(`${panelData.name} placed on ${roofType}! (+${panelData.power}kW)`, 'success');
+    }
+
+    function createScorePopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'solar-score-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.offsetLeft + 'px';
+      popup.style.top = element.offsetTop + 'px';
+
+      element.parentElement.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    function createEnergyFlow(panelElement) {
+      const flow = document.createElement('div');
+      flow.className = 'energy-flow';
+      flow.textContent = '⚡';
+      flow.style.left = panelElement.offsetLeft + 'px';
+      flow.style.top = panelElement.offsetTop + 'px';
+
+      elements.energyIndicators.appendChild(flow);
+
+      setTimeout(() => flow.remove(), 2000);
+    }
+
+    function updateSunIntensity() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      // Simulate sun intensity changes (clouds, time of day)
+      const change = (Math.random() - 0.5) * 20;
+      gameState.sunIntensity = Math.max(20, Math.min(100, gameState.sunIntensity + change));
+
+      updateUI();
+    }
+
+    function generateEnergy() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      let totalEnergy = 0;
+      const intensityMultiplier = gameState.sunIntensity / 100;
+
+      gameState.placedPanels.forEach(panel => {
+        const energy = panel.power * intensityMultiplier;
+        totalEnergy += energy;
+
+        // Create energy flow animation occasionally
+        if (Math.random() < 0.3) {
+          createEnergyFlow(panel.element);
+        }
+      });
+
+      gameState.energyGenerated += totalEnergy;
+      gameState.score += Math.floor(totalEnergy);
+
+      updateUI();
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.panelsPlaced / 5) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+
+        // Show level up effect
+        const levelUpEffect = document.createElement('div');
+        levelUpEffect.className = 'solar-level-up';
+        levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
+        elements.gameArea.appendChild(levelUpEffect);
+
+        setTimeout(() => levelUpEffect.remove(), 2000);
+
+        showMessage(`Level Up! Now Level ${gameState.level}`, 'success');
+        addConfetti();
+      }
+    }
+
+    function checkAchievements() {
+      // Solar Starter
+      if (gameState.panelsPlaced >= 5 && !gameState.achievements['solar-starter']) {
+        unlockAchievement('solar-starter', 'Solar Starter! 🔋');
+      }
+
+      // Energy Master
+      if (gameState.energyGenerated >= 200 && !gameState.achievements['energy-master']) {
+        unlockAchievement('energy-master', 'Energy Master! ⚡');
+      }
+
+      // Green Builder
+      if (gameState.score >= 500 && !gameState.achievements['green-builder']) {
+        unlockAchievement('green-builder', 'Green Builder! 🌱');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
+      if (achievementEl) {
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
+      }
+
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 100; // Bonus points for achievements
+      updateUI();
+    }
+
+    function startGame() {
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+
+      // Start game timer
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          }
+        }
+      }, 1000);
+
+      // Start sun intensity changes
+      gameState.sunInterval = setInterval(updateSunIntensity, 3000);
+
+      // Start energy generation
+      gameState.energyInterval = setInterval(generateEnergy, 1000);
+
+      showMessage('Solar panel building started! Drag panels to roofs!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.sunInterval) clearInterval(gameState.sunInterval);
+      if (gameState.energyInterval) clearInterval(gameState.energyInterval);
+
+      // Clear placed panels
+      gameState.placedPanels.forEach(panel => {
+        if (panel.element && panel.element.parentNode) {
+          panel.element.remove();
+        }
+      });
+      gameState.placedPanels = [];
+
+      // Reset roof capacities
+      Object.keys(gameState.roofCapacities).forEach(roof => {
+        gameState.roofCapacities[roof].current = 0;
+      });
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.energyGenerated = 0;
+      gameState.panelsPlaced = 0;
+      gameState.level = 1;
+      gameState.timeLeft = 60;
+      gameState.sunIntensity = 100;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
+        }
+      });
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      updateUI();
+      showMessage('Solar panel game reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.sunInterval) clearInterval(gameState.sunInterval);
+      if (gameState.energyInterval) clearInterval(gameState.energyInterval);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`Solar Panel Building (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Energy Generated: ${Math.floor(gameState.energyGenerated)}kW | Panels Placed: ${gameState.panelsPlaced} | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 400) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+
+    // Initialize drag and drop
+    initializeDragAndDrop();
+
+    // Initialize UI
+    updateUI();
+    showMessage('Solar Panel Builder game loaded! Click Start Building to begin!', 'info');
   }
 
-  function createSmokeEffect(row, col) {
-    const smoke = document.createElement('div');
-    smoke.className = 'smoke-cloud';
-    smoke.textContent = '💨';
-    
-    const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
-    const rect = cell.getBoundingClientRect();
-    const containerRect = elements.forestGrid.getBoundingClientRect();
-    
-    smoke.style.left = (rect.left - containerRect.left + 15) + 'px';
-    smoke.style.top = (rect.top - containerRect.top + 10) + 'px';
-    
-    elements.smokeEffects.appendChild(smoke);
-    
-    setTimeout(() => smoke.remove(), 3000);
-  }
+  // Save the Forest Game Implementation
+  function initSaveTheForestGame() {
+    const gameState = {
+      score: 0,
+      treesSaved: 0,
+      firesExtinguished: 0,
+      level: 1,
+      timeLeft: 60,
+      fireDanger: 30,
+      isPlaying: false,
+      isPaused: false,
+      gameInterval: null,
+      timerInterval: null,
+      fireSpreadInterval: null,
+      helicopterInterval: null,
+      forestGrid: [],
+      activeFires: [],
+      tools: {
+        waterHose: { ready: true, cooldown: 0 },
+        fireExtinguisher: { ready: true, cooldown: 0 },
+        helicopter: { ready: false, cooldown: 10 }
+      },
+      achievements: {
+        'fire-fighter': false,
+        'forest-guardian': false,
+        'eco-hero': false
+      }
+    };
 
-  function createFireSpreadEffect(row, col) {
-    const spread = document.createElement('div');
-    spread.className = 'fire-spread';
-    spread.textContent = '🔥';
-    
-    const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
-    const rect = cell.getBoundingClientRect();
-    const containerRect = elements.forestGrid.getBoundingClientRect();
-    
-    spread.style.left = (rect.left - containerRect.left + 20) + 'px';
-    spread.style.top = (rect.top - containerRect.top + 20) + 'px';
-    
-    elements.fireEffects.appendChild(spread);
-    
-    setTimeout(() => spread.remove(), 800);
-  }
+    const GRID_SIZE = { rows: 4, cols: 8 };
+    const TREE_STATES = {
+      HEALTHY: 'healthy',
+      BURNING: 'burning',
+      BURNT: 'burnt',
+      SAVED: 'saved'
+    };
 
-  function createScorePopup(element, text, color) {
-    const popup = document.createElement('div');
-    popup.className = 'forest-score-popup';
-    popup.textContent = text;
-    popup.style.color = color;
-    popup.style.left = element.offsetLeft + 'px';
-    popup.style.top = element.offsetTop + 'px';
-    
-    element.parentElement.appendChild(popup);
-    
-    setTimeout(() => popup.remove(), 1000);
-  }
+    const elements = {
+      scoreEl: document.getElementById('forest-score'),
+      treesSavedEl: document.getElementById('trees-saved'),
+      firesExtinguishedEl: document.getElementById('fires-extinguished'),
+      levelEl: document.getElementById('forest-level'),
+      timerEl: document.getElementById('forest-timer'),
+      fireDangerEl: document.getElementById('fire-danger'),
+      dangerMeterFill: document.getElementById('danger-meter-fill'),
+      forestGrid: document.getElementById('forest-grid'),
+      waterDrops: document.getElementById('water-drops'),
+      fireEffects: document.getElementById('fire-effects'),
+      smokeEffects: document.getElementById('smoke-effects'),
+      helicopter: document.getElementById('rescue-helicopter'),
+      startBtn: document.getElementById('start-forest-game'),
+      pauseBtn: document.getElementById('pause-forest-game'),
+      resetBtn: document.getElementById('reset-forest-game'),
+      waterHoseTool: document.getElementById('water-hose'),
+      fireExtinguisherTool: document.getElementById('fire-extinguisher'),
+      helicopterTool: document.getElementById('helicopter-water'),
+      achievementsContainer: document.getElementById('forest-achievements')
+    };
 
-  function useHelicopter() {
-    if (!gameState.tools.helicopter.ready || !gameState.isPlaying) return;
-    
-    // Extinguish all fires
-    gameState.activeFires.forEach(fire => {
-      const tree = gameState.forestGrid[fire.row][fire.col];
+    function updateUI() {
+      elements.scoreEl.textContent = gameState.score;
+      elements.treesSavedEl.textContent = gameState.treesSaved;
+      elements.firesExtinguishedEl.textContent = gameState.firesExtinguished;
+      elements.levelEl.textContent = gameState.level;
+      elements.timerEl.textContent = gameState.timeLeft;
+      elements.dangerMeterFill.style.width = gameState.fireDanger + '%';
+
+      // Update fire danger level text
+      if (gameState.fireDanger < 40) {
+        elements.fireDangerEl.textContent = 'Low';
+        elements.fireDangerEl.style.color = '#4CAF50';
+      } else if (gameState.fireDanger < 70) {
+        elements.fireDangerEl.textContent = 'Medium';
+        elements.fireDangerEl.style.color = '#FFC107';
+      } else {
+        elements.fireDangerEl.textContent = 'High';
+        elements.fireDangerEl.style.color = '#FF5722';
+      }
+
+      updateToolStatus();
+    }
+
+    function updateToolStatus() {
+      // Update tool visual states
+      Object.keys(gameState.tools).forEach(toolName => {
+        const tool = gameState.tools[toolName];
+        const toolElement = elements[toolName + 'Tool'];
+        const statusElement = toolElement.querySelector('.tool-status');
+
+        toolElement.classList.remove('ready', 'charging');
+
+        if (tool.ready) {
+          toolElement.classList.add('ready');
+          statusElement.textContent = 'Ready';
+        } else {
+          toolElement.classList.add('charging');
+          statusElement.textContent = `${tool.cooldown}s`;
+        }
+      });
+    }
+
+    function initializeForest() {
+      elements.forestGrid.innerHTML = '';
+      gameState.forestGrid = [];
+
+      for (let row = 0; row < GRID_SIZE.rows; row++) {
+        gameState.forestGrid[row] = [];
+        for (let col = 0; col < GRID_SIZE.cols; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'forest-cell';
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+
+          const tree = document.createElement('div');
+          tree.className = 'tree healthy';
+          tree.textContent = '🌳';
+          tree.addEventListener('click', () => handleTreeClick(row, col));
+
+          cell.appendChild(tree);
+          elements.forestGrid.appendChild(cell);
+
+          gameState.forestGrid[row][col] = {
+            element: tree,
+            state: TREE_STATES.HEALTHY,
+            fireIntensity: 0
+          };
+        }
+      }
+    }
+
+    function handleTreeClick(row, col) {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      const tree = gameState.forestGrid[row][col];
+
+      if (tree.state === TREE_STATES.BURNING) {
+        extinguishFire(row, col);
+      }
+    }
+
+    function extinguishFire(row, col) {
+      const tree = gameState.forestGrid[row][col];
+
+      if (tree.state !== TREE_STATES.BURNING) return;
+
+      // Change tree back to healthy
       tree.state = TREE_STATES.SAVED;
       tree.element.className = 'tree saved';
       tree.element.textContent = '🌳';
       tree.fireIntensity = 0;
-      
+
+      // Remove from active fires
+      gameState.activeFires = gameState.activeFires.filter(
+        fire => !(fire.row === row && fire.col === col)
+      );
+
+      // Update stats
       gameState.firesExtinguished++;
       gameState.treesSaved++;
-      gameState.score += 50;
-      
-      createHelicopterDropEffect(fire.row, fire.col);
-    });
-    
-    gameState.activeFires = [];
-    gameState.fireDanger = Math.max(0, gameState.fireDanger - 30);
-    
-    // Set helicopter on cooldown
-    gameState.tools.helicopter.ready = false;
-    gameState.tools.helicopter.cooldown = 15;
-    
-    showMessage('Helicopter water drop successful! All fires extinguished!', 'success');
-    updateUI();
-  }
+      gameState.score += 20;
 
-  function createHelicopterDropEffect(row, col) {
-    const drop = document.createElement('div');
-    drop.className = 'helicopter-drop';
-    drop.textContent = '💧';
-    
-    const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
-    const rect = cell.getBoundingClientRect();
-    const containerRect = elements.forestGrid.getBoundingClientRect();
-    
-    drop.style.left = (rect.left - containerRect.left + 10) + 'px';
-    drop.style.top = (rect.top - containerRect.top - 20) + 'px';
-    
-    elements.waterDrops.appendChild(drop);
-    
-    setTimeout(() => drop.remove(), 2000);
-  }
+      // Visual effects
+      createWaterDropEffect(row, col);
+      createScorePopup(tree.element, '+20', '#4CAF50');
 
-  function updateCooldowns() {
-    Object.keys(gameState.tools).forEach(toolName => {
-      const tool = gameState.tools[toolName];
-      if (!tool.ready && tool.cooldown > 0) {
-        tool.cooldown--;
-        if (tool.cooldown <= 0) {
-          tool.ready = true;
+      // Reset to healthy after animation
+      setTimeout(() => {
+        if (tree.state === TREE_STATES.SAVED) {
+          tree.state = TREE_STATES.HEALTHY;
+          tree.element.className = 'tree healthy';
+        }
+      }, 1000);
+
+      checkLevelUp();
+      checkAchievements();
+      updateUI();
+    }
+
+    function startFire() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      // Find healthy trees
+      const healthyTrees = [];
+      for (let row = 0; row < GRID_SIZE.rows; row++) {
+        for (let col = 0; col < GRID_SIZE.cols; col++) {
+          if (gameState.forestGrid[row][col].state === TREE_STATES.HEALTHY) {
+            healthyTrees.push({ row, col });
+          }
         }
       }
-    });
-    updateToolStatus();
-  }
 
-  function checkLevelUp() {
-    const newLevel = Math.floor(gameState.firesExtinguished / 10) + 1;
-    if (newLevel > gameState.level) {
-      gameState.level = newLevel;
-      
-      // Show level up effect
-      const levelUpEffect = document.createElement('div');
-      levelUpEffect.className = 'forest-level-up';
-      levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
-      elements.forestGrid.appendChild(levelUpEffect);
-      
-      setTimeout(() => levelUpEffect.remove(), 2000);
-      
-      showMessage(`Level Up! Now Level ${gameState.level} - Fires spread faster!`, 'success');
-      addConfetti();
-    }
-  }
+      if (healthyTrees.length === 0) return;
 
-  function checkAchievements() {
-    // Fire Fighter
-    if (gameState.firesExtinguished >= 15 && !gameState.achievements['fire-fighter']) {
-      unlockAchievement('fire-fighter', 'Fire Fighter! 🚒');
+      // Start fire on random healthy tree
+      const randomTree = healthyTrees[Math.floor(Math.random() * healthyTrees.length)];
+      igniteTree(randomTree.row, randomTree.col);
     }
-    
-    // Forest Guardian
-    if (gameState.treesSaved >= 25 && !gameState.achievements['forest-guardian']) {
-      unlockAchievement('forest-guardian', 'Forest Guardian! 🌳');
-    }
-    
-    // Eco Hero
-    if (gameState.score >= 600 && !gameState.achievements['eco-hero']) {
-      unlockAchievement('eco-hero', 'Eco Hero! 🏆');
-    }
-  }
 
-  function unlockAchievement(achievementId, message) {
-    gameState.achievements[achievementId] = true;
-    const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
-    if (achievementEl) {
-      achievementEl.classList.remove('locked');
-      achievementEl.classList.add('unlocked');
-    }
-    
-    showMessage(`Achievement Unlocked: ${message}`, 'success');
-    gameState.score += 100; // Bonus points for achievements
-    updateUI();
-  }
+    function igniteTree(row, col) {
+      const tree = gameState.forestGrid[row][col];
 
-  function startGame() {
-    gameState.isPlaying = true;
-    gameState.isPaused = false;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    
-    initializeForest();
-    
-    // Start game timer
-    gameState.timerInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        gameState.timeLeft--;
-        updateUI();
-        
-        if (gameState.timeLeft <= 0) {
-          endGame();
+      if (tree.state !== TREE_STATES.HEALTHY) return;
+
+      tree.state = TREE_STATES.BURNING;
+      tree.element.className = 'tree burning';
+      tree.element.textContent = '🔥';
+      tree.fireIntensity = 1;
+
+      gameState.activeFires.push({ row, col, startTime: Date.now() });
+
+      createSmokeEffect(row, col);
+      createFireSpreadEffect(row, col);
+
+      // Increase fire danger
+      gameState.fireDanger = Math.min(100, gameState.fireDanger + 5);
+      updateUI();
+    }
+
+    function spreadFires() {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      const newFires = [];
+
+      gameState.activeFires.forEach(fire => {
+        const { row, col } = fire;
+        const tree = gameState.forestGrid[row][col];
+
+        // Check if fire should burn out the tree
+        if (Date.now() - fire.startTime > 5000) {
+          tree.state = TREE_STATES.BURNT;
+          tree.element.className = 'tree burnt';
+          tree.element.textContent = '🪵';
+          gameState.score = Math.max(0, gameState.score - 10);
+          return;
         }
-      }
-    }, 1000);
-    
-    // Start fire spawning
-    gameState.gameInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        startFire();
-        updateCooldowns();
-      }
-    }, 3000 - (gameState.level * 200));
-    
-    // Start fire spreading
-    gameState.fireSpreadInterval = setInterval(() => {
-      if (!gameState.isPaused) {
-        spreadFires();
-      }
-    }, 2000);
-    
-    showMessage('Forest firefighting started! Click on fires to extinguish them!', 'info');
-  }
 
-  function pauseGame() {
-    gameState.isPaused = !gameState.isPaused;
-    elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
-    
-    if (gameState.isPaused) {
-      showMessage('Game Paused', 'warning');
-    } else {
-      showMessage('Game Resumed', 'info');
+        // Spread to adjacent trees
+        const directions = [
+          [-1, -1], [-1, 0], [-1, 1],
+          [0, -1], [0, 1],
+          [1, -1], [1, 0], [1, 1]
+        ];
+
+        directions.forEach(([dr, dc]) => {
+          const newRow = row + dr;
+          const newCol = col + dc;
+
+          if (newRow >= 0 && newRow < GRID_SIZE.rows &&
+            newCol >= 0 && newCol < GRID_SIZE.cols) {
+
+            const adjacentTree = gameState.forestGrid[newRow][newCol];
+
+            if (adjacentTree.state === TREE_STATES.HEALTHY &&
+              Math.random() < 0.1 * (gameState.level * 0.5)) {
+              newFires.push({ row: newRow, col: newCol });
+            }
+          }
+        });
+      });
+
+      // Remove burnt trees from active fires
+      gameState.activeFires = gameState.activeFires.filter(fire => {
+        const tree = gameState.forestGrid[fire.row][fire.col];
+        return tree.state === TREE_STATES.BURNING;
+      });
+
+      // Ignite new fires
+      newFires.forEach(fire => {
+        igniteTree(fire.row, fire.col);
+      });
     }
-  }
 
-  function resetGame() {
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.fireSpreadInterval) clearInterval(gameState.fireSpreadInterval);
-    
-    // Reset game state
-    gameState.score = 0;
-    gameState.treesSaved = 0;
-    gameState.firesExtinguished = 0;
-    gameState.level = 1;
-    gameState.timeLeft = 60;
-    gameState.fireDanger = 30;
-    gameState.isPlaying = false;
-    gameState.isPaused = false;
-    gameState.activeFires = [];
-    
-    // Reset tools
-    gameState.tools = {
-      waterHose: { ready: true, cooldown: 0 },
-      fireExtinguisher: { ready: true, cooldown: 0 },
-      helicopter: { ready: false, cooldown: 10 }
-    };
-    
-    // Reset achievements
-    Object.keys(gameState.achievements).forEach(key => {
-      gameState.achievements[key] = false;
-      const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+    function createWaterDropEffect(row, col) {
+      const drop = document.createElement('div');
+      drop.className = 'water-drop';
+      drop.textContent = '💧';
+
+      const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
+      const rect = cell.getBoundingClientRect();
+      const containerRect = elements.forestGrid.getBoundingClientRect();
+
+      drop.style.left = (rect.left - containerRect.left + 20) + 'px';
+      drop.style.top = (rect.top - containerRect.top + 20) + 'px';
+
+      elements.waterDrops.appendChild(drop);
+
+      setTimeout(() => drop.remove(), 1000);
+    }
+
+    function createSmokeEffect(row, col) {
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke-cloud';
+      smoke.textContent = '💨';
+
+      const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
+      const rect = cell.getBoundingClientRect();
+      const containerRect = elements.forestGrid.getBoundingClientRect();
+
+      smoke.style.left = (rect.left - containerRect.left + 15) + 'px';
+      smoke.style.top = (rect.top - containerRect.top + 10) + 'px';
+
+      elements.smokeEffects.appendChild(smoke);
+
+      setTimeout(() => smoke.remove(), 3000);
+    }
+
+    function createFireSpreadEffect(row, col) {
+      const spread = document.createElement('div');
+      spread.className = 'fire-spread';
+      spread.textContent = '🔥';
+
+      const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
+      const rect = cell.getBoundingClientRect();
+      const containerRect = elements.forestGrid.getBoundingClientRect();
+
+      spread.style.left = (rect.left - containerRect.left + 20) + 'px';
+      spread.style.top = (rect.top - containerRect.top + 20) + 'px';
+
+      elements.fireEffects.appendChild(spread);
+
+      setTimeout(() => spread.remove(), 800);
+    }
+
+    function createScorePopup(element, text, color) {
+      const popup = document.createElement('div');
+      popup.className = 'forest-score-popup';
+      popup.textContent = text;
+      popup.style.color = color;
+      popup.style.left = element.offsetLeft + 'px';
+      popup.style.top = element.offsetTop + 'px';
+
+      element.parentElement.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    function useHelicopter() {
+      if (!gameState.tools.helicopter.ready || !gameState.isPlaying) return;
+
+      // Extinguish all fires
+      gameState.activeFires.forEach(fire => {
+        const tree = gameState.forestGrid[fire.row][fire.col];
+        tree.state = TREE_STATES.SAVED;
+        tree.element.className = 'tree saved';
+        tree.element.textContent = '🌳';
+        tree.fireIntensity = 0;
+
+        gameState.firesExtinguished++;
+        gameState.treesSaved++;
+        gameState.score += 50;
+
+        createHelicopterDropEffect(fire.row, fire.col);
+      });
+
+      gameState.activeFires = [];
+      gameState.fireDanger = Math.max(0, gameState.fireDanger - 30);
+
+      // Set helicopter on cooldown
+      gameState.tools.helicopter.ready = false;
+      gameState.tools.helicopter.cooldown = 15;
+
+      showMessage('Helicopter water drop successful! All fires extinguished!', 'success');
+      updateUI();
+    }
+
+    function createHelicopterDropEffect(row, col) {
+      const drop = document.createElement('div');
+      drop.className = 'helicopter-drop';
+      drop.textContent = '💧';
+
+      const cell = elements.forestGrid.children[row * GRID_SIZE.cols + col];
+      const rect = cell.getBoundingClientRect();
+      const containerRect = elements.forestGrid.getBoundingClientRect();
+
+      drop.style.left = (rect.left - containerRect.left + 10) + 'px';
+      drop.style.top = (rect.top - containerRect.top - 20) + 'px';
+
+      elements.waterDrops.appendChild(drop);
+
+      setTimeout(() => drop.remove(), 2000);
+    }
+
+    function updateCooldowns() {
+      Object.keys(gameState.tools).forEach(toolName => {
+        const tool = gameState.tools[toolName];
+        if (!tool.ready && tool.cooldown > 0) {
+          tool.cooldown--;
+          if (tool.cooldown <= 0) {
+            tool.ready = true;
+          }
+        }
+      });
+      updateToolStatus();
+    }
+
+    function checkLevelUp() {
+      const newLevel = Math.floor(gameState.firesExtinguished / 10) + 1;
+      if (newLevel > gameState.level) {
+        gameState.level = newLevel;
+
+        // Show level up effect
+        const levelUpEffect = document.createElement('div');
+        levelUpEffect.className = 'forest-level-up';
+        levelUpEffect.textContent = `LEVEL ${gameState.level}!`;
+        elements.forestGrid.appendChild(levelUpEffect);
+
+        setTimeout(() => levelUpEffect.remove(), 2000);
+
+        showMessage(`Level Up! Now Level ${gameState.level} - Fires spread faster!`, 'success');
+        addConfetti();
+      }
+    }
+
+    function checkAchievements() {
+      // Fire Fighter
+      if (gameState.firesExtinguished >= 15 && !gameState.achievements['fire-fighter']) {
+        unlockAchievement('fire-fighter', 'Fire Fighter! 🚒');
+      }
+
+      // Forest Guardian
+      if (gameState.treesSaved >= 25 && !gameState.achievements['forest-guardian']) {
+        unlockAchievement('forest-guardian', 'Forest Guardian! 🌳');
+      }
+
+      // Eco Hero
+      if (gameState.score >= 600 && !gameState.achievements['eco-hero']) {
+        unlockAchievement('eco-hero', 'Eco Hero! 🏆');
+      }
+    }
+
+    function unlockAchievement(achievementId, message) {
+      gameState.achievements[achievementId] = true;
+      const achievementEl = document.querySelector(`[data-achievement="${achievementId}"]`);
       if (achievementEl) {
-        achievementEl.classList.remove('unlocked');
-        achievementEl.classList.add('locked');
+        achievementEl.classList.remove('locked');
+        achievementEl.classList.add('unlocked');
       }
-    });
-    
-    // Reset UI
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.pauseBtn.textContent = '⏸️ Pause';
-    
+
+      showMessage(`Achievement Unlocked: ${message}`, 'success');
+      gameState.score += 100; // Bonus points for achievements
+      updateUI();
+    }
+
+    function startGame() {
+      gameState.isPlaying = true;
+      gameState.isPaused = false;
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+
+      initializeForest();
+
+      // Start game timer
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          gameState.timeLeft--;
+          updateUI();
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          }
+        }
+      }, 1000);
+
+      // Start fire spawning
+      gameState.gameInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          startFire();
+          updateCooldowns();
+        }
+      }, 3000 - (gameState.level * 200));
+
+      // Start fire spreading
+      gameState.fireSpreadInterval = setInterval(() => {
+        if (!gameState.isPaused) {
+          spreadFires();
+        }
+      }, 2000);
+
+      showMessage('Forest firefighting started! Click on fires to extinguish them!', 'info');
+    }
+
+    function pauseGame() {
+      gameState.isPaused = !gameState.isPaused;
+      elements.pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+
+      if (gameState.isPaused) {
+        showMessage('Game Paused', 'warning');
+      } else {
+        showMessage('Game Resumed', 'info');
+      }
+    }
+
+    function resetGame() {
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.fireSpreadInterval) clearInterval(gameState.fireSpreadInterval);
+
+      // Reset game state
+      gameState.score = 0;
+      gameState.treesSaved = 0;
+      gameState.firesExtinguished = 0;
+      gameState.level = 1;
+      gameState.timeLeft = 60;
+      gameState.fireDanger = 30;
+      gameState.isPlaying = false;
+      gameState.isPaused = false;
+      gameState.activeFires = [];
+
+      // Reset tools
+      gameState.tools = {
+        waterHose: { ready: true, cooldown: 0 },
+        fireExtinguisher: { ready: true, cooldown: 0 },
+        helicopter: { ready: false, cooldown: 10 }
+      };
+
+      // Reset achievements
+      Object.keys(gameState.achievements).forEach(key => {
+        gameState.achievements[key] = false;
+        const achievementEl = document.querySelector(`[data-achievement="${key}"]`);
+        if (achievementEl) {
+          achievementEl.classList.remove('unlocked');
+          achievementEl.classList.add('locked');
+        }
+      });
+
+      // Reset UI
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.pauseBtn.textContent = '⏸️ Pause';
+
+      initializeForest();
+      updateUI();
+      showMessage('Forest game reset!', 'info');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+
+      // Clear intervals
+      if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      if (gameState.fireSpreadInterval) clearInterval(gameState.fireSpreadInterval);
+
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+
+      // Calculate final score and award points
+      const finalScore = gameState.score;
+      const pointsEarned = Math.floor(finalScore / 10);
+
+      if (pointsEarned > 0) {
+        completeTask(`Forest Protection (Score: ${finalScore})`, pointsEarned);
+      }
+
+      showMessage(`Game Over! Final Score: ${finalScore} | Trees Saved: ${gameState.treesSaved} | Fires Extinguished: ${gameState.firesExtinguished} | Points Earned: ${pointsEarned}`, 'success');
+
+      // Show confetti for good scores
+      if (finalScore >= 500) {
+        addConfetti();
+      }
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.resetBtn.addEventListener('click', resetGame);
+    elements.helicopterTool.addEventListener('click', useHelicopter);
+
+    // Initialize forest and UI
     initializeForest();
     updateUI();
-    showMessage('Forest game reset!', 'info');
+    showMessage('Save the Forest game loaded! Click Start Firefighting to begin!', 'info');
   }
-
-  function endGame() {
-    gameState.isPlaying = false;
-    
-    // Clear intervals
-    if (gameState.gameInterval) clearInterval(gameState.gameInterval);
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-    if (gameState.fireSpreadInterval) clearInterval(gameState.fireSpreadInterval);
-    
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    
-    // Calculate final score and award points
-    const finalScore = gameState.score;
-    const pointsEarned = Math.floor(finalScore / 10);
-    
-    if (pointsEarned > 0) {
-      completeTask(`Forest Protection (Score: ${finalScore})`, pointsEarned);
-    }
-    
-    showMessage(`Game Over! Final Score: ${finalScore} | Trees Saved: ${gameState.treesSaved} | Fires Extinguished: ${gameState.firesExtinguished} | Points Earned: ${pointsEarned}`, 'success');
-    
-    // Show confetti for good scores
-    if (finalScore >= 500) {
-      addConfetti();
-    }
-  }
-
-  // Event listeners
-  elements.startBtn.addEventListener('click', startGame);
-  elements.pauseBtn.addEventListener('click', pauseGame);
-  elements.resetBtn.addEventListener('click', resetGame);
-  elements.helicopterTool.addEventListener('click', useHelicopter);
-
-  // Initialize forest and UI
-  initializeForest();
-  updateUI();
-  showMessage('Save the Forest game loaded! Click Start Firefighting to begin!', 'info');
-}
 
   // Add error handling for any remaining issues
   window.addEventListener("error", (e) => {
@@ -8268,5 +8330,329 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+});
+
+// Login/Register Functionality
+document.addEventListener('DOMContentLoaded', function () {
+  // Get modal elements
+  const loginModal = document.getElementById('login-modal');
+  const loginBtn = document.getElementById('login-btn');
+  const closeModal = document.querySelector('.close-modal');
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const authForms = document.querySelectorAll('.auth-form');
+  const switchLinks = document.querySelectorAll('.switch-link');
+
+  // Get forms
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+
+  // Check if user is already logged in
+  checkLoginStatus();
+
+  // Open modal
+  loginBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    loginModal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  });
+
+  // Close modal
+  closeModal.addEventListener('click', function () {
+    closeLoginModal();
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener('click', function (e) {
+    if (e.target === loginModal) {
+      closeLoginModal();
+    }
+  });
+
+  // Tab switching
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const targetTab = this.getAttribute('data-tab');
+      switchTab(targetTab);
+    });
+  });
+
+  // Switch links
+  switchLinks.forEach(link => {
+    link.addEventListener('click', function () {
+      const targetTab = this.getAttribute('data-tab');
+      switchTab(targetTab);
+    });
+  });
+
+  // Login form submission
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    handleLogin();
+  });
+
+  // Register form submission
+  registerForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    handleRegister();
+  });
+
+  function closeLoginModal() {
+    loginModal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scrolling
+    clearMessages();
+  }
+
+  function switchTab(targetTab) {
+    // Update tab buttons
+    tabButtons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('data-tab') === targetTab) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Update forms
+    authForms.forEach(form => {
+      form.classList.remove('active');
+      if (form.id === targetTab + '-form') {
+        form.classList.add('active');
+      }
+    });
+
+    clearMessages();
+  }
+
+  function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) {
+      showMessage('Please fill in all fields', 'error');
+      return;
+    }
+
+    // Get stored users
+    const users = JSON.parse(localStorage.getItem('ecolearn_users') || '[]');
+
+    // Find user by email or user ID
+    const user = users.find(u =>
+      u.email.toLowerCase() === email.toLowerCase() ||
+      u.userId.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!user) {
+      showMessage('User not found. Please check your email/user ID or register first.', 'error');
+      return;
+    }
+
+    if (user.password !== password) {
+      showMessage('Incorrect password. Please try again.', 'error');
+      return;
+    }
+
+    // Login successful
+    localStorage.setItem('ecolearn_current_user', JSON.stringify(user));
+    showMessage('Login successful! Welcome back, ' + user.name + '!', 'success');
+
+    setTimeout(() => {
+      closeLoginModal();
+      updateLoginStatus();
+      updateProfileDisplay();
+    }, 1500);
+  }
+
+  function handleRegister() {
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const userId = document.getElementById('register-userid').value.trim();
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm-password').value;
+
+    // Validation
+    if (!name || !email || !userId || !password || !confirmPassword) {
+      showMessage('Please fill in all fields', 'error');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showMessage('Passwords do not match', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage('Password must be at least 6 characters long', 'error');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showMessage('Please enter a valid email address', 'error');
+      return;
+    }
+
+    if (userId.length < 3) {
+      showMessage('User ID must be at least 3 characters long', 'error');
+      return;
+    }
+
+    // Check if user already exists
+    const users = JSON.parse(localStorage.getItem('ecolearn_users') || '[]');
+
+    const existingUser = users.find(u =>
+      u.email.toLowerCase() === email.toLowerCase() ||
+      u.userId.toLowerCase() === userId.toLowerCase()
+    );
+
+    if (existingUser) {
+      if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+        showMessage('An account with this email already exists', 'error');
+      } else {
+        showMessage('This user ID is already taken', 'error');
+      }
+      return;
+    }
+
+    // Create new user
+    const newUser = {
+      id: Date.now().toString(),
+      name: name,
+      email: email,
+      userId: userId,
+      password: password,
+      registeredAt: new Date().toISOString(),
+      ecoPoints: 0,
+      level: 1,
+      badges: [],
+      completedChallenges: []
+    };
+
+    // Save user
+    users.push(newUser);
+    localStorage.setItem('ecolearn_users', JSON.stringify(users));
+    localStorage.setItem('ecolearn_current_user', JSON.stringify(newUser));
+
+    showMessage('Registration successful! Welcome to EcoLearn, ' + name + '!', 'success');
+
+    setTimeout(() => {
+      closeLoginModal();
+      updateLoginStatus();
+      updateProfileDisplay();
+    }, 1500);
+  }
+
+  function showMessage(text, type) {
+    // Remove existing messages
+    clearMessages();
+
+    const message = document.createElement('div');
+    message.className = `message ${type}`;
+    message.textContent = text;
+
+    // Insert message at the top of the active form
+    const activeForm = document.querySelector('.auth-form.active');
+    activeForm.insertBefore(message, activeForm.firstChild);
+  }
+
+  function clearMessages() {
+    const messages = document.querySelectorAll('.message');
+    messages.forEach(msg => msg.remove());
+  }
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function checkLoginStatus() {
+    const currentUser = JSON.parse(localStorage.getItem('ecolearn_current_user') || 'null');
+    if (currentUser) {
+      updateLoginStatus();
+    }
+    updateProfileDisplay();
+  }
+
+  function updateLoginStatus() {
+    const currentUser = JSON.parse(localStorage.getItem('ecolearn_current_user') || 'null');
+    const loginBtn = document.getElementById('login-btn');
+
+    if (currentUser) {
+      // User is logged in - show user info
+      loginBtn.innerHTML = `
+                <div class="user-info show">
+                    <div class="user-avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
+                    <span>${currentUser.name}</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            `;
+      loginBtn.style.pointerEvents = 'none'; // Disable click on login button
+    } else {
+      // User is not logged in - show login button
+      loginBtn.innerHTML = '<i class="fas fa-user"></i> Login';
+      loginBtn.style.pointerEvents = 'auto';
+    }
+  }
+
+  // Make logout function global
+  window.logout = function () {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('ecolearn_current_user');
+      updateLoginStatus();
+      updateProfileDisplay();
+      showNotification('You have been logged out successfully', 'info');
+    }
+  };
+
+  function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+
+    // Add styles
+    notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            animation: slideInRight 0.3s ease;
+        `;
+
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  // Add CSS for notifications
+  const notificationStyles = document.createElement('style');
+  notificationStyles.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+  document.head.appendChild(notificationStyles);
 });
 

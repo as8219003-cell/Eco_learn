@@ -50,6 +50,11 @@
                 <li class="nav-item">
                     <a href="#contact" class="nav-link"> Contact</a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="login-btn">
+                        <i class="fas fa-user"></i> Login
+                    </a>
+                </li>
             </ul>
             <div class="hamburger">
                 <span class="bar"></span>
@@ -89,16 +94,6 @@
                     <span class="stat-label">Waste Recycled</span>
                 </div>
             </div>
-            <div class="hero-ctas">
-                <a href="#challenges" class="cta-button" target="_blank">Start Your Journey</a>
-            </div>
-
-            <!-- Centered Explore Factors Button -->
-            <div class="hero-explore-factors">
-                <button class="cta-button explore-factors-center" id="cta-explore-factors">
-                    <i class="fas fa-cogs"></i> Explore Factors
-                </button>
-            </div>
         </div>
         <!-- <div class="hero-image">
             <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=600&h=400&fit=crop"
@@ -109,44 +104,81 @@
     <!-- About Section -->
     <section id="about" class="about">
         <div class="container">
-            <h2 class="section-title">About EcoLearn</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>EcoLearn is a revolutionary platform that gamifies environmental conservation. We believe that
-                        small actions can create big changes when we work together.</p>
-                    <p>Our mission is to inspire and educate people about sustainable living practices while rewarding
-                        their efforts with a unique point system.</p>
-                    <div class="features">
-                        <div class="feature">
-                            <i class="fas fa-gamepad"></i>
-                            <h3>Gamified Experience</h3>
-                            <p>Complete challenges and earn points in a fun, engaging way</p>
+            <div class="about-hero">
+                <h2 class="section-title">About EcoLearn</h2>
+                <p class="about-tagline">Transforming Environmental Education Through Innovation</p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-card mission-card">
+                    <div class="card-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Our Mission</h3>
+                    <p>To create a sustainable future by empowering individuals with interactive learning experiences
+                        that make environmental conservation engaging, accessible, and rewarding.</p>
+                </div>
+
+                <div class="about-card vision-card">
+                    <div class="card-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Our Vision</h3>
+                    <p>A world where every person is equipped with the knowledge and motivation to make environmentally
+                        conscious decisions that collectively create positive global impact.</p>
+                </div>
+
+                <div class="about-card impact-card">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Our Impact</h3>
+                    <div class="impact-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">10K+</span>
+                            <span class="stat-label">Active Learners</span>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-graduation-cap"></i>
-                            <h3>Educational Content</h3>
-                            <p>Learn about environmental issues and solutions</p>
+                        <div class="stat-item">
+                            <span class="stat-number">50K+</span>
+                            <span class="stat-label">Challenges Completed</span>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-trophy"></i>
-                            <h3>Rewards System</h3>
-                            <p>Earn badges and recognition for your contributions</p>
+                        <div class="stat-item">
+                            <span class="stat-number">1M+</span>
+                            <span class="stat-label">Eco Points Earned</span>
                         </div>
                     </div>
                 </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=600&fit=crop"
-                        alt="Eco Friendly Action">
+            </div>
+
+            <div class="about-features">
+                <h3 class="features-title">Why Choose EcoLearn?</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-gamepad"></i>
+                        <h4>Gamified Learning</h4>
+                        <p>Interactive challenges and games that make learning about sustainability fun and engaging.
+                        </p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-brain"></i>
+                        <h4>AI-Powered Insights</h4>
+                        <p>Smart recommendations and personalized learning paths based on your progress and interests.
+                        </p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <h4>Community Driven</h4>
+                        <p>Connect with like-minded individuals and participate in collaborative environmental
+                            initiatives.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-trophy"></i>
+                        <h4>Achievement System</h4>
+                        <p>Earn badges, points, and recognition for your environmental contributions and learning
+                            milestones.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Factors Toggle Section -->
-    <section id="factors" class="about">
-        <div class="container">
-            <h2 class="section-title">Factors</h2>
-            <p class="section-subtitle">Click here or in navbar to show/hide Factors content</p>
         </div>
     </section>
 
@@ -161,7 +193,10 @@
                 <!-- Interactive Learning -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-graduation-cap"></i>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z" />
+                        </svg>
                     </div>
                     <h3>Interactive Micro-Lessons</h3>
                     <p>Engaging lessons mapped to school curriculum & local environmental issues</p>
@@ -172,68 +207,96 @@
                         <li>Progress tracking</li>
                     </ul>
                     <button class="feature-btn" onclick="exploreFeature('micro-lessons')">
-                        <i class="fas fa-play"></i> Explore Lessons
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Explore Lessons
                     </button>
                 </div>
 
                 <!-- Real-World Challenges -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-tree"></i>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            <path
+                                d="M12 15.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                        </svg>
                     </div>
                     <h3>Real-World Challenges</h3>
                     <p>Take action with practical environmental projects and community initiatives</p>
                     <ul class="feature-list">
-                        <li>Tree plantation drives</li>
-                        <li>Waste segregation campaigns</li>
-                        <li>Water audit projects</li>
-                        <li>Community clean-ups</li>
+                        <li>Community projects</li>
+                        <li>Environmental action</li>
+                        <li>Impact measurement</li>
+                        <li>Peer collaboration</li>
                     </ul>
                     <button class="feature-btn" onclick="exploreFeature('challenges')">
-                        <i class="fas fa-rocket"></i> Start Challenge
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path
+                                d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.66c.03-.08.06-.17.09-.25C6.84 17.25 9 15 12 15s5.16 2.25 6.25 4.09c.03.08.06.17.09.25l.95 2.66 1.89-.66C18.1 16.17 16 10 17 8z" />
+                        </svg>
+                        Start Challenge
                     </button>
                 </div>
 
                 <!-- Gamification -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-trophy"></i>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z" />
+                            <path d="M12 8L14.5 13H9.5L12 8Z" />
+                        </svg>
                     </div>
                     <h3>Eco-Points & Rewards</h3>
                     <p>Earn points, unlock badges, and compete on school/college leaderboards</p>
                     <ul class="feature-list">
-                        <li>Point-based rewards</li>
+                        <li>Point system</li>
                         <li>Achievement badges</li>
-                        <li>School leaderboards</li>
-                        <li>College competitions</li>
+                        <li>Leaderboards</li>
+                        <li>Rewards catalog</li>
                     </ul>
-                    <button class="feature-btn" onclick="exploreFeature('rewards')">
-                        <i class="fas fa-star"></i> View Rewards
+                    <button class="feature-btn" onclick="exploreFeature('gamification')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        View Rewards
                     </button>
                 </div>
 
                 <!-- AI Verification -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-robot"></i>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 7C14.76 7 17 9.24 17 12S14.76 17 12 17S7 14.76 7 12S9.24 7 12 7ZM12 9C10.34 9 9 10.34 9 12S10.34 15 12 15S15 13.66 15 12S13.66 9 12 9Z" />
+                            <circle cx="12" cy="12" r="1.5" />
+                        </svg>
                     </div>
                     <h3>AI Verification System</h3>
-                    <p>Advanced AI technology for photo proof, GPS tracking, and time verification</p>
+                    <p>Smart verification of environmental actions using AI-powered image recognition</p>
                     <ul class="feature-list">
-                        <li>Photo proof verification</li>
-                        <li>GPS location tracking</li>
-                        <li>Time-stamp validation</li>
-                        <li>AI-powered analysis</li>
+                        <li>Photo verification</li>
+                        <li>Action validation</li>
+                        <li>Fraud prevention</li>
+                        <li>Instant feedback</li>
                     </ul>
                     <button class="feature-btn" onclick="exploreFeature('ai-verification')">
-                        <i class="fas fa-camera"></i> Try AI Camera
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path
+                                d="M9 2L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4H16.83L15 2H9ZM12 7C14.76 7 17 9.24 17 12S14.76 17 12 17S7 14.76 7 12S9.24 7 12 7Z" />
+                        </svg>
+                        Try AI Camera
                     </button>
                 </div>
 
                 <!-- AI Tutor -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
+                        <i class="fas fa-user-graduate"></i>
                     </div>
                     <h3>AI Tutor & Nudges</h3>
                     <p>Personalized learning assistance with smart reminders and adaptive guidance</p>
@@ -244,14 +307,14 @@
                         <li>Progress insights</li>
                     </ul>
                     <button class="feature-btn" onclick="exploreFeature('ai-tutor')">
-                        <i class="fas fa-comments"></i> Chat with AI
+                        <i class="fas fa-robot"></i> Chat with AI
                     </button>
                 </div>
 
                 <!-- Dashboards -->
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-desktop"></i>
                     </div>
                     <h3>Multi-User Dashboards</h3>
                     <p>Specialized interfaces for teachers, eco-clubs, NGOs, and government campaigns</p>
@@ -262,7 +325,7 @@
                         <li>Government reporting</li>
                     </ul>
                     <button class="feature-btn" onclick="exploreFeature('dashboards')">
-                        <i class="fas fa-tachometer-alt"></i> Access Dashboard
+                        <i class="fas fa-chart-bar"></i> Access Dashboard
                     </button>
                 </div>
             </div>
@@ -951,7 +1014,7 @@
     </section>
 
     <!-- Profile Section -->
-    <section id="profile" class="profile factor-section">
+    <section id="profile" class="profile factor-section" style="display: none;">
         <div class="container">
             <h2 class="section-title">Your Profile</h2>
             <p class="section-subtitle">Welcome, <span id="profile-name">Guest</span></p>
@@ -2719,10 +2782,76 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <h2>Welcome to EcoLearn</h2>
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="register">Register</button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form active">
+                <h3>Login to Your Account</h3>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="login-email">Email or User ID</label>
+                        <input type="text" id="login-email" placeholder="Enter your email or user ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <p class="auth-switch">Don't have an account? <span class="switch-link" data-tab="register">Register
+                        here</span></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form">
+                <h3>Create New Account</h3>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-userid">User ID</label>
+                        <input type="text" id="register-userid" placeholder="Choose a unique user ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" placeholder="Confirm your password"
+                            required>
+                    </div>
+                    <button type="submit" class="auth-btn">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </form>
+                <p class="auth-switch">Already have an account? <span class="switch-link" data-tab="login">Login
+                        here</span></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="cursor-trail.js"></script>
     <script src="script.js"></script>
 
     <!-- Leaflet Map (Open Source Alternative) -->

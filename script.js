@@ -3847,215 +3847,221 @@ function joinLocationChallenge(title, points) {
   // In a real implementation, this would integrate with maps and tracking
 }
 
-// Role-based Onboarding System
-function initializeOnboarding() {
-  const roleButtons = document.querySelectorAll('.role-btn');
-  const userTypeSelector = document.getElementById('user-type-selector');
-  const studentOnboarding = document.getElementById('student-onboarding');
-  const teacherOnboarding = document.getElementById('teacher-onboarding');
-  const govtOnboarding = document.getElementById('govt-onboarding');
-  const backButton = document.getElementById('back-to-roles');
+// // Role-based Onboarding System
+// function initializeOnboarding() {
+//   const roleButtons = document.querySelectorAll('.role-btn');
+//   const userTypeSelector = document.getElementById('user-type-selector');
+//   const studentOnboarding = document.getElementById('student-onboarding');
+//   const teacherOnboarding = document.getElementById('teacher-onboarding');
+//   const govtOnboarding = document.getElementById('govt-onboarding');
+//   const backButton = document.getElementById('back-to-roles');
 
-  // Role selection handlers
-  roleButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const role = btn.dataset.role;
-      userTypeSelector.style.display = 'none';
-      backButton.style.display = 'block';
+//   // Role selection handlers
+//   roleButtons.forEach(btn => {
+//     btn.addEventListener('click', () => {
+//       const role = btn.dataset.role;
+//       userTypeSelector.style.display = 'none';
+//       backButton.style.display = 'block';
 
-      // Hide all onboarding forms
-      studentOnboarding.style.display = 'none';
-      teacherOnboarding.style.display = 'none';
-      govtOnboarding.style.display = 'none';
+//       // Hide all onboarding forms
+//       if (studentOnboarding) studentOnboarding.style.display = 'none';
+//       if (teacherOnboarding) teacherOnboarding.style.display = 'none';
+//       if (govtOnboarding) govtOnboarding.style.display = 'none';
 
-      // Show selected role form
-      if (role === 'student') {
-        studentOnboarding.style.display = 'block';
-      } else if (role === 'teacher') {
-        teacherOnboarding.style.display = 'block';
-      } else if (role === 'government') {
-        govtOnboarding.style.display = 'block';
-      }
-    });
-  });
+//       // Show selected role form
+//       if (role === 'student') {
+//         if (studentOnboarding) {
+//           studentOnboarding.style.display = 'block';
+//         } else {
+//           showMessage('Student registration is currently unavailable.', 'info');
+//           userTypeSelector.style.display = 'block';
+//           backButton.style.display = 'none';
+//         }
+//       } else if (role === 'teacher') {
+//         teacherOnboarding.style.display = 'block';
+//       } else if (role === 'government') {
+//         govtOnboarding.style.display = 'block';
+//       }
+//     });
+//   });
 
-  // Back button handler
-  backButton.addEventListener('click', () => {
-    userTypeSelector.style.display = 'block';
-    studentOnboarding.style.display = 'none';
-    teacherOnboarding.style.display = 'none';
-    govtOnboarding.style.display = 'none';
-    backButton.style.display = 'none';
-  });
+//   // Back button handler
+//   backButton.addEventListener('click', () => {
+//     userTypeSelector.style.display = 'block';
+//     if (studentOnboarding) studentOnboarding.style.display = 'none';
+//     if (teacherOnboarding) teacherOnboarding.style.display = 'none';
+//     if (govtOnboarding) govtOnboarding.style.display = 'none';
+//     backButton.style.display = 'none';
+//   });
 
-  // Verification handlers
-  document.getElementById('verify-student').addEventListener('click', handleStudentVerification);
-  document.getElementById('verify-teacher').addEventListener('click', handleTeacherVerification);
-  document.getElementById('verify-official').addEventListener('click', handleOfficialVerification);
-}
+//   // Verification handlers
+//   const verifyStudentBtn = document.getElementById('verify-student');
+//   if (verifyStudentBtn) {
+//     verifyStudentBtn.addEventListener('click', handleStudentVerification);
+//   }
+//   document.getElementById('verify-teacher').addEventListener('click', handleTeacherVerification);
+//   document.getElementById('verify-official').addEventListener('click', handleOfficialVerification);
+// }
 
-function handleStudentVerification() {
-  const udiseCode = document.getElementById('udise-code').value;
-  const studentClass = document.getElementById('student-class').value;
-  const rollNumber = document.getElementById('roll-number').value;
-  const studentName = document.getElementById('student-name').value;
-  const studentPhone = document.getElementById('student-phone').value;
+// function handleStudentVerification() {
+//   const udiseCode = document.getElementById('udise-code').value;
+//   const studentClass = document.getElementById('student-class').value;
+//   const rollNumber = document.getElementById('roll-number').value;
+//   const studentName = document.getElementById('student-name').value;
+//   const studentPhone = document.getElementById('student-phone').value;
 
-  if (!udiseCode || !studentClass || !rollNumber || !studentName || !studentPhone) {
-    showMessage('Please fill all required fields', 'error');
-    return;
-  }
+//   if (!udiseCode || !studentClass || !rollNumber || !studentName || !studentPhone) {
+//     showMessage('Please fill all required fields', 'error');
+//     return;
+//   }
 
-  // Simulate UDISE verification
-  showMessage('Verifying UDISE code...', 'info');
+//   // Simulate UDISE verification
+//   showMessage('Verifying UDISE code...', 'info');
 
-  setTimeout(() => {
-    // Mock school data
-    const mockSchools = {
-      '03180101001': 'Government Senior Secondary School, Amritsar',
-      '03180201002': 'DAV Public School, Jalandhar',
-      '03180301003': 'Government High School, Ludhiana',
-      '03180401004': 'Khalsa College Public School, Patiala'
-    };
+//   setTimeout(() => {
+//     // Mock school data
+//     const mockSchools = {
+//       '03180101001': 'Government Senior Secondary School, Amritsar',
+//       '03180201002': 'DAV Public School, Jalandhar',
+//       '03180301003': 'Government High School, Ludhiana',
+//       '03180401004': 'Khalsa College Public School, Patiala'
+//     };
 
-    const schoolName = mockSchools[udiseCode];
+//     const schoolName = mockSchools[udiseCode];
 
-    if (schoolName) {
-      // Store student data
-      const studentData = {
-        role: 'student',
-        udiseCode,
-        schoolName,
-        class: studentClass,
-        rollNumber,
-        name: studentName,
-        phone: studentPhone,
-        registrationDate: new Date().toISOString(),
-        trustScore: 'Medium',
-        ecoPoints: 0,
-        level: 1
-      };
+//     if (schoolName) {
+//       // Store student data
+//       const studentData = {
+//         role: 'student',
+//         udiseCode,
+//         schoolName,
+//         class: studentClass,
+//         rollNumber,
+//         name: studentName,
+//         phone: studentPhone,
+//         registrationDate: new Date().toISOString(),
+//         trustScore: 'Medium',
+//         ecoPoints: 0,
+//         level: 1
+//       };
 
-      localStorage.setItem('ecoUserData', JSON.stringify(studentData));
-      localStorage.setItem('ecoUserName', studentName);
-      localStorage.setItem('ecoUserRole', 'student');
-      localStorage.setItem('ecoLoggedIn', 'true');
+//       localStorage.setItem('ecoUserData', JSON.stringify(studentData));
+//       localStorage.setItem('ecoUserName', studentName);
+//       localStorage.setItem('ecoUserRole', 'student');
+//       localStorage.setItem('ecoLoggedIn', 'true');
 
-      showMessage(`Welcome ${studentName}! Registered to ${schoolName}`, 'success');
+//       showMessage(`Welcome ${studentName}! Registered to ${schoolName}`, 'success');
 
-      setTimeout(() => {
-        document.getElementById('login-overlay').style.display = 'none';
-        setSectionsVisibility(true);
-        updateProfileUI();
-      }, 2000);
+//       setTimeout(() => {
+//         document.getElementById('login-overlay').style.display = 'none';
+//         setSectionsVisibility(true);
+//         updateProfileUI();
+//       }, 2000);
 
-    } else {
-      showMessage('Invalid UDISE code. Please check and try again.', 'error');
-    }
-  }, 2000);
-}
+//     } else {
+//       showMessage('Invalid UDISE code. Please check and try again.', 'error');
+//     }
+//   }, 2000);
+// }
 
-function handleTeacherVerification() {
-  const teacherUdise = document.getElementById('teacher-udise').value;
-  const teacherId = document.getElementById('teacher-id').value;
-  const teacherName = document.getElementById('teacher-name').value;
-  const teacherRole = document.getElementById('teacher-role').value;
-  const teacherPhone = document.getElementById('teacher-phone').value;
+// function handleTeacherVerification() {
+//   const teacherUdise = document.getElementById('teacher-udise').value;
+//   const teacherId = document.getElementById('teacher-id').value;
+//   const teacherName = document.getElementById('teacher-name').value;
+//   const teacherRole = document.getElementById('teacher-role').value;
+//   const teacherPhone = document.getElementById('teacher-phone').value;
 
-  if (!teacherUdise || !teacherId || !teacherName || !teacherRole || !teacherPhone) {
-    showMessage('Please fill all required fields', 'error');
-    return;
-  }
+//   if (!teacherUdise || !teacherId || !teacherName || !teacherRole || !teacherPhone) {
+//     showMessage('Please fill all required fields', 'error');
+//     return;
+//   }
 
-  showMessage('Verifying teacher credentials...', 'info');
+//   showMessage('Verifying teacher credentials...', 'info');
 
-  setTimeout(() => {
-    const teacherData = {
-      role: 'teacher',
-      udiseCode: teacherUdise,
-      teacherId,
-      name: teacherName,
-      teacherRole,
-      phone: teacherPhone,
-      registrationDate: new Date().toISOString(),
-      permissions: ['moderate_submissions', 'create_challenges', 'view_analytics']
-    };
+//   setTimeout(() => {
+//     const teacherData = {
+//       role: 'teacher',
+//       udiseCode: teacherUdise,
+//       teacherId,
+//       name: teacherName,
+//       teacherRole,
+//       phone: teacherPhone,
+//       registrationDate: new Date().toISOString(),
+//       permissions: ['moderate_submissions', 'create_challenges', 'view_analytics']
+//     };
 
-    localStorage.setItem('ecoUserData', JSON.stringify(teacherData));
-    localStorage.setItem('ecoUserName', teacherName);
-    localStorage.setItem('ecoUserRole', 'teacher');
-    localStorage.setItem('ecoLoggedIn', 'true');
+//     localStorage.setItem('ecoUserData', JSON.stringify(teacherData));
+//     localStorage.setItem('ecoUserName', teacherName);
+//     localStorage.setItem('ecoUserRole', 'teacher');
+//     localStorage.setItem('ecoLoggedIn', 'true');
 
-    showMessage(`Welcome ${teacherName}! Teacher account verified.`, 'success');
+//     showMessage(`Welcome ${teacherName}! Teacher account verified.`, 'success');
 
-    setTimeout(() => {
-      document.getElementById('login-overlay').style.display = 'none';
-      setSectionsVisibility(true);
-      updateProfileUI();
-      initializeTeacherDashboard();
-    }, 2000);
-  }, 2000);
-}
+//     setTimeout(() => {
+//       document.getElementById('login-overlay').style.display = 'none';
+//       setSectionsVisibility(true);
+//       updateProfileUI();
+//       initializeTeacherDashboard();
+//     }, 2000);
+//   }, 2000);
+// }
 
-function handleOfficialVerification() {
-  const orgName = document.getElementById('org-name').value;
-  const orgType = document.getElementById('org-type').value;
-  const officialId = document.getElementById('official-id').value;
-  const officialName = document.getElementById('official-name').value;
-  const officialPhone = document.getElementById('official-phone').value;
+// function handleOfficialVerification() {
+//   const orgName = document.getElementById('org-name').value;
+//   const orgType = document.getElementById('org-type').value;
+//   const officialId = document.getElementById('official-id').value;
+//   const officialName = document.getElementById('official-name').value;
+//   const officialPhone = document.getElementById('official-phone').value;
 
-  if (!orgName || !orgType || !officialId || !officialName || !officialPhone) {
-    showMessage('Please fill all required fields', 'error');
-    return;
-  }
+//   if (!orgName || !orgType || !officialId || !officialName || !officialPhone) {
+//     showMessage('Please fill all required fields', 'error');
+//     return;
+//   }
 
-  showMessage('Verifying official credentials...', 'info');
+//   showMessage('Verifying official credentials...', 'info');
 
-  setTimeout(() => {
-    const officialData = {
-      role: 'government',
-      orgName,
-      orgType,
-      officialId,
-      name: officialName,
-      phone: officialPhone,
-      registrationDate: new Date().toISOString(),
-      permissions: ['view_analytics', 'audit_submissions', 'generate_reports']
-    };
+//   setTimeout(() => {
+//     const officialData = {
+//       role: 'government',
+//       orgName,
+//       orgType,
+//       officialId,
+//       name: officialName,
+//       phone: officialPhone,
+//       registrationDate: new Date().toISOString(),
+//       permissions: ['view_analytics', 'audit_submissions', 'generate_reports']
+//     };
 
-    localStorage.setItem('ecoUserData', JSON.stringify(officialData));
-    localStorage.setItem('ecoUserName', officialName);
-    localStorage.setItem('ecoUserRole', 'government');
-    localStorage.setItem('ecoLoggedIn', 'true');
+//     localStorage.setItem('ecoUserData', JSON.stringify(officialData));
+//     localStorage.setItem('ecoUserName', officialName);
+//     localStorage.setItem('ecoUserRole', 'government');
+//     localStorage.setItem('ecoLoggedIn', 'true');
 
-    showMessage(`Welcome ${officialName}! Official account verified.`, 'success');
+//     showMessage(`Welcome ${officialName}! Official account verified.`, 'success');
 
-    setTimeout(() => {
-      document.getElementById('login-overlay').style.display = 'none';
-      setSectionsVisibility(true);
-      updateProfileUI();
-      initializeGovernmentDashboard();
-    }, 2000);
-  }, 2000);
-}
+//     setTimeout(() => {
+//       document.getElementById('login-overlay').style.display = 'none';
+//       setSectionsVisibility(true);
+//       updateProfileUI();
+//       initializeGovernmentDashboard();
+//     }, 2000);
+//   }, 2000);
+// }
 
-function initializeTeacherDashboard() {
-  // Add teacher-specific features
-  showMessage('Teacher dashboard features activated!', 'info');
-  // This would initialize teacher-specific UI elements
-}
+// function initializeTeacherDashboard() {
+//   // Add teacher-specific features
+//   showMessage('Teacher dashboard features activated!', 'info');
+//   // This would initialize teacher-specific UI elements
+// }
 
-function initializeGovernmentDashboard() {
-  // Add government-specific features
-  showMessage('Government dashboard features activated!', 'info');
-  // This would initialize government-specific UI elements
-}
-
+// function initializeGovernmentDashboard() {
+//   // Add government-specific features
+//   showMessage('Government dashboard features activated!', 'info');
+//   // This would initialize government-specific UI elements
+// }
 
 // Initialize quiz event listeners
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize onboarding system
-  initializeOnboarding();
 
   // Login gating
   const loginOverlay = document.getElementById("login-overlay");

@@ -35,10 +35,9 @@ body {
 .login-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     z-index: 2000;
 }
 
@@ -736,7 +735,7 @@ body {
 }
 
 /* Role-based Onboarding Styles */
-.user-type-selector {
+/* .user-type-selector {
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -745,7 +744,7 @@ body {
     color: white;
     margin-bottom: 1.5rem;
     font-size: 1.2rem;
-}
+} */
 
 @keyframes slideIn {
     from {
